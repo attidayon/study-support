@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3択クイズ</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        #quiz-container {
+            margin: 20px;
+        }
+        button {
+            display: block;
+            margin: 5px 0;
+        }
+        #result {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        #advice {
+           margin: 20px;
+            color: blue;
+        }
+        #next-button {
+            display: none;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>3択クイズ</h1>
+    <div id="quiz-container">
+        <p id="question"></p>
+        <button id="option1" onclick="checkAnswer(0)"></button>
+        <button id="option2" onclick="checkAnswer(1)"></button>
+        <button id="option3" onclick="checkAnswer(2)"></button>
+        <p id="result"></p>
+        <p id="advice"></p>
+        <button id="next-button" onclick="nextQuiz()">次へ</button>
+    </div>
+
+    <script>
+      const quizzes = [
+       
+     {
+      question:"1-4 <ruby>math<rt>マス</rt></ruby><ruby>teacher<rt>ティーチャー</rt></ruby>の<ruby>意味<rt>いみ</rt></ruby>は<ruby>何<rt>なに</rt></ruby>ですか。",
+      options:["<ruby>体育<rt>たいいく</rt></ruby> の<ruby>先生<rt>せんせい</rt></ruby>",
+      　　　　 "<ruby>数学<rt>すうがく</rt></ruby>の <ruby>先生<rt>せんせい</rt></ruby>",
+      　　　　 "<ruby>国語<rt>こくご</rt></ruby>の <ruby>先生<rt>せんせい</rt></ruby>"
+      　　　　 ],
+      correctAnswer:1,
+      advice: "<ruby>math<rt>マス</rt></ruby>は、 <ruby>数学<rt>すうがく</rt></ruby>のことです。<ruby>mathematics<rt>マセマチックス</rt></ruby>の <ruby>略<rt>りゃく</rt></ruby>です。"
+    },
+     {
+      question:"2-4 <ruby>彼<rt>かれ</rt></ruby>のお<ruby>父<rt>とう</rt></ruby>さんは<ruby>数学<rt>すうがく</rt></ruby>の<ruby>先生<rt>せんせい</rt></ruby>です。",
+      options:["<ruby>His<rt>ヒズ</rt></ruby> <ruby>father<rt>ファーザー</rt></ruby> <ruby>are<rt>アー</rt></ruby> <ruby>a<rt>ア</rt></ruby> <ruby>math<rt>マス</rt></ruby> <ruby>teacher<rt>テーチャー</rt></ruby>.",
+      　　　　 "<ruby>His<rt>ヒズ</rt></ruby> <ruby>father<rt>ファーザー</rt></ruby> <ruby>is<rt>イズ</rt></ruby> <ruby>a<rt>ア</rt></ruby> <ruby>math<rt>マス</rt></ruby> <ruby>teacher<rt>テーチャー</rt></ruby>.",
+      　　　　 "<ruby>His<rt>ヒズ</rt></ruby> <ruby>father<rt>ファーザー</rt></ruby> <ruby>am<rt>アム</rt></ruby> <ruby>a<rt>ア</rt></ruby> <ruby>math<rt>マス</rt></ruby> <ruby>teacher<rt>テーチャー</rt></ruby>."
+      　　　　 ],
+      correctAnswer:1,
+      advice: "<ruby>His<rt>ヒズ</rt></ruby> <ruby>father<rt>ファーザー</rt></ruby>の<ruby>代名詞<rt>だいめいし</rt></ruby>は <ruby>he<rt>ヒィ</rt></ruby>なので、<ruby>be動詞<rt>ビーどうし</rt></ruby>は <ruby>is<rt>イズ</rt></ruby>がくる。"
+    },
+    {
+      question:"3-4 <ruby>shrine<rt>シュリーン</rt></ruby>の<ruby>意味<rt>いみ</rt></ruby>は<ruby>何<rt>なに</rt></ruby>ですか。",
+      options:["<ruby>手裏剣<rt>しゅりけん</rt></ruby>",
+      　　　　 "しらない",
+      　　　　 "<ruby>神社<rt>じんじゃ</rt></ruby>"
+      　　　　 ],
+      correctAnswer:2,
+      advice: " <ruby>shrine<rt>シュリーン</rt></ruby>の<ruby>意味<rt>いみ</rt></ruby>は、<ruby>神社<rt>じんじゃ</rt></ruby>です。 "
+    },
+    {
+      question:"4-4 その<ruby>神社<rt>じんじゃ</rt></ruby>はとても<ruby>古<rt>ふる</rt></ruby>い",
+      options:["<ruby>The<rt>ザ</rt></ruby> <ruby>shrine<rt>シュリィン</rt></ruby> <ruby>are<rt>アー</rt></ruby> <ruby>very<rt>ベリィ</rt></ruby> <ruby>old<rt>オールド</rt></ruby>.",
+      　　　　"<ruby>The<rt>ザ</rt></ruby> <ruby>shrine<rt>シュリィン</rt></ruby> <ruby>am<rt>アム</rt></ruby> <ruby>very<rt>ベリィ</rt></ruby> <ruby>old<rt>オールド</rt></ruby>.",
+      　　　　"<ruby>The<rt>ザ</rt></ruby> <ruby>shrine<rt>シュリィン</rt></ruby> <ruby>is<rt>イズ</rt></ruby> <ruby>very<rt>ベリィ</rt></ruby> <ruby>old<rt>オールド</rt></ruby>."
+      　　　　 ],
+      correctAnswer:2,
+      advice: "<ruby>The<rt>ザ</rt></ruby> <ruby>shrine<rt>シュリィン</rt></ruby>の<ruby>代名詞<rt>だいめいし</rt></ruby>は <ruby>It<rt>イット</rt></ruby>なので、<ruby>be動詞<rt>ビーどうし</rt></ruby>は <ruby>is<rt>イズ</rt></ruby>がくる。"
+    },
+    {
+      question:"5-4 <ruby>彼<rt>かれ</rt></ruby>らはサッカーのファンです。",
+      options:["<ruby>They<rt>ゼイ</rt></ruby> <ruby>are<rt>アー</rt></ruby> <ruby>soccer<rt>サッカー</rt></ruby> <ruby>fans<rt>ファンズ</rt></ruby> .",
+      　　　　"<ruby>They<rt>ゼイ</rt></ruby> <ruby>is<rt>イズ</rt></ruby> <ruby>soccer<rt>サッカー</rt></ruby> <ruby>fans<rt>ファンズ</rt></ruby> .",
+      　　　　"<ruby>They<rt>ゼイ</rt></ruby> <ruby>am<rt>アム</rt></ruby> <ruby>soccer<rt>サッカー</rt></ruby> <ruby>fans<rt>ファンズ</rt></ruby> ."
+      　　　　 ],
+      correctAnswer:0,
+      advice: "<ruby>They<rt>ゼイ</rt></ruby> かれらは、<ruby>複数形<rt>ふくすうけい</rt></ruby>なので、<ruby>be動詞<rt>ビーどうし</rt></ruby>は <ruby>are<rt>アー</rt></ruby>がくる。"
+    },
+     {
+      question:"6-4 <ruby>庭<rt>にわ</rt></ruby>に１<ruby>本<rt>ほん</rt></ruby>の<ruby>木<rt>き</rt></ruby>があります。",
+      options:["<ruby>Threr<rt>ゼア</rt></ruby> <ruby>are<rt>アー</rt></ruby> <ruby>a<rt>ア</rt></ruby> <ruby>tree<rt>トリー</rt></ruby> <ruby>in<rt>イン</rt></ruby> <ruby>the<rt>ザ</rt></ruby> <ruby>garden<rt>ガーデン</rt></ruby> .",
+      　　　　"<ruby>Threr<rt>ゼア</rt></ruby> <ruby>is<rt>イズ</rt></ruby> <ruby>a<rt>ア</rt></ruby> <ruby>tree<rt>トリー</rt></ruby> <ruby>in<rt>イン</rt></ruby> <ruby>the<rt>ザ</rt></ruby> <ruby>garden<rt>ガーデン</rt></ruby> .",
+      　　　　"<ruby>Threr<rt>ゼア</rt></ruby> <ruby>am<rt>アム</rt></ruby> <ruby>a<rt>ア</rt></ruby> <ruby>tree<rt>トリー</rt></ruby> <ruby>in<rt>イン</rt></ruby> <ruby>the<rt>ザ</rt></ruby> <ruby>garden<rt>ガーデン</rt></ruby> .",
+      　　　　 ],
+      correctAnswer:1,
+      advice: "<ruby>主語<rt>しゅご</rt></ruby>は、<ruby>a<rt>ア</rt></ruby>   <ruby>tree<rt>トリー</rt></ruby>なので、<ruby>be動詞<rt>ビーどうし</rt></ruby>は <ruby>is<rt>イズ</rt></ruby>がくる。"
+    },
+     {
+      question:"7-4 <ruby>机<rt>つくえ</rt></ruby>の<ruby>上<rt>うえ</rt></ruby>に２<ruby>個<rt>こ</rt></ruby>のリンゴがあります。",
+      options:["<ruby>Threr<rt>ゼア</rt></ruby> <ruby>are<rt>アー</rt></ruby> <ruby>two<rt>ツー</rt></ruby> <ruby>apples<rt>アップルズ</rt></ruby> <ruby>on<rt>オン</rt></ruby> <ruby>the<rt>ザ</rt></ruby> <ruby>table<rt>テーブル</rt></ruby> .",
+      　　　　"<ruby>Threr<rt>ゼア</rt></ruby> <ruby>is<rt>イズ</rt></ruby> <ruby>two<rt>ツー</rt></ruby> <ruby>apples<rt>アップルズ</rt></ruby> <ruby>on<rt>オン</rt></ruby> <ruby>the<rt>ザ</rt></ruby> <ruby>table<rt>テーブル</rt></ruby> .",
+      　　　　"<ruby>Threr<rt>ゼア</rt></ruby> <ruby>am<rt>アム</rt></ruby> <ruby>two<rt>ツー</rt></ruby> <ruby>apples<rt>アップルズ</rt></ruby> <ruby>on<rt>オン</rt></ruby> <ruby>the<rt>ザ</rt></ruby> <ruby>table<rt>テーブル</rt></ruby> ."
+      　　　　 ],
+      correctAnswer:0,
+      advice: "<ruby>主語<rt>しゅご</rt></ruby>は、 <ruby>two<rt>ツー</rt></ruby> <ruby>apples<rt>アップルズ</rt></ruby>なので、<ruby>be動詞<rt>ビーどうし</rt></ruby>は <ruby>are<rt>アー</rt></ruby>がくる。"
+    },
+    {
+      question:"8-5 <ruby>次<rt>つぎ</rt></ruby>の<ruby>英文<rt>えいぶん</rt></ruby>で<ruby>疑問文<rt>ぎもんぶん</rt></ruby>はどれか。",
+      options:["<ruby>I<rt>アイ</rt></ruby> <ruby>am<rt>アム</rt></ruby> <ruby>not<rt>ノット</rt></ruby> <ruby>a<rt>ア</rt></ruby> <ruby>soccer<rt>サッカー</rt></ruby> <ruby>player<rt>プレイヤー</rt></ruby>.",
+      　　　　"<ruby>Are<rt>アー</rt></ruby> <ruby>they<rt>ゼイ</rt></ruby> <ruby>your<rt>ユア</rt></ruby> <ruby>friends<rt>フレンズ</rt></ruby> ?",
+      　　　　"<ruby>They<rt>ゼイ</rt></ruby> <ruby>are<rt>アー</rt></ruby> <ruby>not<rt>ノット</rt></ruby> <ruby>my<rt>マイ</rt></ruby> <ruby>classmates<rt>クラスメイツ</rt></ruby>."
+      　　　　 ],
+      correctAnswer:1,
+      advice: "<ruby>be動詞<rt>ビーどうし</rt></ruby>の<ruby>疑問文<rt>ぎもんぶん</rt></ruby>は、<ruby>be動詞<rt>ビーどうし</rt></ruby>が<ruby>一番前<rt>いちばんまえ</rt></ruby>にきます。"
+    },
+    {
+      question:"9-5 <ruby>次<rt>つぎ</rt></ruby>の<ruby>英文<rt>えいぶん</rt></ruby>で<ruby>否定文<rt>ひていぶん</rt></ruby>はどれか。",
+      options:["<ruby>Is<rt>イズ</rt></ruby> <ruby>Jim<rt>ジム</rt></ruby> <ruby>from<rt>フロム</rt></ruby> <ruby>Australia<rt>オーストラリア</rt></ruby>?",
+      　　　　"<ruby>Is<rt>イズ</rt></ruby> <ruby>he<rt>ヒー</rt></ruby> <ruby>in<rt>イン</rt></ruby> <ruby>the<rt>ザ</rt></ruby> <ruby>library<rt>ライブラリィー</rt></ruby> ?",
+      　　　　"<ruby>You<rt>ユー</rt></ruby> <ruby>are<rt>アー</rt></ruby> <ruby>not<rt>ノット</rt></ruby> <ruby>alone<rt>アロン</rt></ruby> ."
+      　　　　 ],
+      correctAnswer:2,
+      advice: "<ruby>be動詞<rt>ビーどうし</rt></ruby>の<ruby>否定文<rt>ひていぶん</rt></ruby>は、<ruby>be動詞<rt>ビーどうし</rt></ruby>のあとに<ruby>not<rt>ノット</rt></ruby>がきます。"
+    },
+    {
+      question:"10-5 <ruby>私<rt>わたし</rt></ruby>はマイクではありません。",
+      options:["<ruby>I<rt>アイ</rt></ruby> <ruby>am<rt>アム</rt></ruby> <ruby>no<rt>ノー</rt></ruby> <ruby>Mike<rt>マイク</rt></ruby>.",
+      　　　　"<ruby>I<rt>アイ</rt></ruby> <ruby>am<rt>アム</rt></ruby> <ruby>not<rt>ノット</rt></ruby> <ruby>Mike<rt>マイク</rt></ruby>.",
+      　　　　"<ruby>I<rt>イア</rt></ruby> <ruby>don't<rt>ドンツ</rt></ruby> <ruby>MIke<rt>マイク</rt></ruby> ."
+      　　　　 ],
+      correctAnswer:1,
+      advice: "<ruby>I<rt>アイ</rt></ruby> <ruby>am<rt>アム</rt></ruby>のあとに、<ruby>not<rt>ノット</rt></ruby> をいれます。"
+    },
+     {
+      question:"11-5 あなたは <ruby>間違<rt>まちが</rt></ruby>っていません。",
+      options:["<ruby>You<rt>ユー</rt></ruby> <ruby>don't<rt>ドンツ</rt></ruby> <ruby>wrong<rt>ロング</rt></ruby> .",
+      　　　　"<ruby>You<rt>ユー</rt></ruby> <ruby>isn't<rt>イズンツ</rt></ruby> <ruby>wrong<rt>ロング</rt></ruby> .",
+      　　　　"<ruby>You<rt>ユー</rt></ruby> <ruby>aren't<rt>アーンツ</rt></ruby> <ruby>wrong<rt>ロング</rt></ruby> ."
+      　　　　 ],
+      correctAnswer:2,
+      advice: "<ruby>You<rt>ユー</rt></ruby> <ruby>are<rt>アー</rt></ruby>のあとに<ruby>not<rt>ノット</rt></ruby>をつけます。"
+    },
+     {
+      question:"12-5 <ruby>彼<rt>かれ</rt></ruby>は <ruby>大阪<rt>おおさか</rt></ruby>の <ruby>出身<rt>しゅっしん</rt></ruby>ではありません。",
+      options:["<ruby>He<rt>ヒー</rt></ruby> <ruby>isn't<rt>イズンツ</rt></ruby> <ruby>from<rt>フロム</rt></ruby> <ruby>Osaka<rt>オオサカ</rt></ruby> .",
+      　　　　"<ruby>He<rt>ヒー</rt></ruby> <ruby>aren't<rt>イズンツ</rt></ruby> <ruby>from<rt>フロム</rt></ruby> <ruby>Osaka<rt>オオサカ</rt></ruby> .",
+      　　　　"<ruby>He<rt>ヒー</rt></ruby> <ruby>doesn't<rt>イズンツ</rt></ruby> <ruby>from<rt>フロム</rt></ruby> <ruby>Osaka<rt>オオサカ</rt></ruby> ."
+      　　　　 ],
+      correctAnswer:0,
+      advice: "<ruby>is<rt>イズ</rt></ruby> <ruby>from<rt>フロム</rt></ruby>で、～<ruby>出身<rt>しゅっしん</rt></ruby>を <ruby>表<rt>あらわ</rt></ruby>すので、この<ruby>is<rt>イズ</rt></ruby>を<ruby>否定<rt>ひてい</rt></ruby>するため<ruby>not<rt>ノット</rt></ruby>をつけます。"
+    },
+     {
+      question:"13-5 その<ruby>公園<rt>こうえん</rt></ruby>にはあまり <ruby>多<rt>おお</rt></ruby>くの <ruby>人<rt>ひと</rt></ruby>がいません。",
+      options:["<ruby>There<rt>ゼア</rt></ruby> <ruby>isn't<rt>イズンツ</rt></ruby> <ruby>many<rt>メニィ</rt></ruby> <ruby>people<rt>ピープル</rt></ruby> <ruby>in<rt>イン</rt></ruby> <ruby>the<rt>ザ</rt></ruby> <ruby>park<rt>パーク</rt></ruby> .",
+      　　　　"<ruby>There<rt>ゼア</rt></ruby> <ruby>aren't<rt>アーンツ</rt></ruby> <ruby>many<rt>メニィ</rt></ruby> <ruby>people<rt>ピープル</rt></ruby> <ruby>in<rt>イン</rt></ruby> <ruby>the<rt>ザ</rt></ruby> <ruby>park<rt>パーク</rt></ruby> .",
+      　　　　"<ruby>There<rt>ゼア</rt></ruby> <ruby>don't<rt>ドンツ</rt></ruby> <ruby>many<rt>メニィ</rt></ruby> <ruby>people<rt>ピープル</rt></ruby> <ruby>in<rt>イン</rt></ruby> <ruby>the<rt>ザ</rt></ruby> <ruby>park<rt>パーク</rt></ruby> .",
+      　　　　],
+      correctAnswer:1,
+      advice: "<ruby>主語<rt>しゅご</rt></ruby>は、<ruby>many<rt>メニィ</rt></ruby> <ruby>people<rt>ピープル</rt></ruby>なので、<ruby>be動詞<rt>ビーどうし</rt></ruby>は <ruby>are<rt>アー</rt></ruby>で、これを<ruby>否定<rt>ひてい</rt></ruby>して <ruby>not<rt>ノット</rt></ruby>をつけます。"
+    },
+     {
+      question:"14-6 <ruby>私<rt>わたし</rt></ruby>は <ruby>昨日<rt>きのう</rt></ruby>、<ruby>家<rt>いえ</rt></ruby>にいました。",
+      options:["<ruby>I<rt>アイ</rt></ruby> <ruby>am<rt>アム</rt></ruby> <ruby>at<rt>アト</rt></ruby> <ruby>home<rt>ホーム</rt></ruby> <ruby>yesterday<rt>イエスタディ</rt></ruby> .",
+      　　　　"<ruby>I<rt>アイ</rt></ruby> <ruby>were<rt>ワー</rt></ruby> <ruby>at<rt>アト</rt></ruby> <ruby>home<rt>ホーム</rt></ruby> <ruby>yesterday<rt>イエスタディ</rt></ruby> .",
+      　　　　"<ruby>I<rt>アイ</rt></ruby> <ruby>was<rt>ワズ</rt></ruby> <ruby>at<rt>アト</rt></ruby> <ruby>home<rt>ホーム</rt></ruby> <ruby>yesterday<rt>イエスタディ</rt></ruby> .",
+      　　　　],
+      correctAnswer:2,
+      advice: "<ruby>家<rt>いえ</rt></ruby>にいました。は<ruby>過去形<rt>かこけい</rt></ruby>で <ruby>am<rt>アム</rt></ruby>「いる」の<ruby>過去形<rt>かこけい</rt></ruby> <ruby>was<rt>ワズ</rt></ruby>「いた」をつかう。"
+    },
+     {
+      question:"15-6 イスの<ruby>上<rt>うえ</rt></ruby>にかばんが１つありました。",
+      options:["<ruby>There<rt>ゼア</rt></ruby> <ruby>were<rt>ワー</rt></ruby> <ruby>a<rt>ア</rt></ruby> <ruby>bag<rt>バッグ</rt></ruby>  <ruby>on<rt>オン</rt></ruby> <ruby>the<rt>ザ</rt></ruby> <ruby>chair<rt>チェア</rt></ruby>  .",
+      　　　　"<ruby>There<rt>ゼア</rt></ruby> <ruby>was<rt>ワズ</rt></ruby> <ruby>a<rt>ア</rt></ruby> <ruby>bag<rt>バッグ</rt></ruby>  <ruby>on<rt>オン</rt></ruby> <ruby>the<rt>ザ</rt></ruby> <ruby>chair<rt>チェア</rt></ruby> .",
+      　　　　"<ruby>There<rt>ゼア</rt></ruby> <ruby>is<rt>イズ</rt></ruby> <ruby>a<rt>ア</rt></ruby> <ruby>bag<rt>バッグ</rt></ruby>  <ruby>on<rt>オン</rt></ruby> <ruby>the<rt>ザ</rt></ruby> <ruby>chair<rt>チェア</rt></ruby> .",
+      　　　　],
+      correctAnswer:1,
+      advice: "これも<ruby>過去形<rt>かこけい</rt></ruby>で <ruby>is<rt>イズ</rt></ruby>「ある」の<ruby>過去形<rt>かこけい</rt></ruby> <ruby>was<rt>ワズ</rt></ruby>「あった」をつかう。"
+    },
+    
+     {
+      question:"16-6 <ruby>私<rt>わたし</rt></ruby>たちはそのとき、<ruby>教室<rt>きょうしつ</rt></ruby>にいませんでした。",
+      options:["<ruby>We<rt>ウィ</rt></ruby> <ruby>weren't<rt>ワーンツ</rt></ruby> <ruby>in<rt>イン</rt></ruby> <ruby>the<rt>ザ</rt></ruby> <ruby>classroom<rt>クラスルーム</rt></ruby> <ruby>then<rt>ゼン</rt></ruby> .",
+      　　　　"<ruby>We<rt>ウィ</rt></ruby> <ruby>wasn't<rt>ワズンツ</rt></ruby> <ruby>in<rt>イン</rt></ruby> <ruby>the<rt>ザ</rt></ruby> <ruby>classroom<rt>クラスルーム</rt></ruby> <ruby>then<rt>ゼン</rt></ruby> .",
+      　　　　"<ruby>We<rt>ウィ</rt></ruby> <ruby>aren't<rt>アーンツ</rt></ruby> <ruby>in<rt>イン</rt></ruby> <ruby>the<rt>ザ</rt></ruby> <ruby>classroom<rt>クラスルーム</rt></ruby> <ruby>then<rt>ゼン</rt></ruby> .",
+      　　　　],
+      correctAnswer:0,
+      advice: " <ruby>私<rt>わたし</rt></ruby>たちの<ruby> be動詞<rt>ビーどうし</rt></ruby>は <ruby>are<rt>アー</rt></ruby>。の<ruby>過去形<rt>かこけい</rt></ruby>は<ruby>were<rt>ワー</rt></ruby>でさらに <ruby>否定<rt>ひてい</rt></ruby>する。"
+    },
+     {
+      question:"17-6 <ruby>私<rt>わたし</rt></ruby>たちは<ruby>今朝<rt>けさ</rt></ruby><ruby>忙<rt>いそが</rt></ruby>しかったのです。",
+      options:["<ruby>We<rt>ウィ</rt></ruby> <ruby>were<rt>ワー</rt></ruby>  <ruby>busy<rt>ビジィ</rt></ruby> <ruby>this<rt>ズィス</rt></ruby> <ruby>morning<rt>モーニング</rt></ruby>.",
+      　　　　"<ruby>We<rt>ウィ</rt></ruby> <ruby>was<rt>ワズ</rt></ruby> <ruby>busy<rt>ビジィ</rt></ruby> <ruby>this<rt>ズィス</rt></ruby> <ruby>morning<rt>モーニング</rt></ruby>.",
+      　　　　"<ruby>We<rt>ウィ</rt></ruby> <ruby>are<rt>アー</rt></ruby> <ruby>busy<rt>ビジィ</rt></ruby> <ruby>this<rt>ズィス</rt></ruby> <ruby>morning<rt>モーニング</rt></ruby>.",
+      　　　　],
+      correctAnswer:0,
+      advice: "<ruby>複数形<rt>ふくすうけい</rt></ruby>の<ruby>忙<rt>いそが</rt></ruby>しいは、<ruby>are<rt>アー</rt></ruby> <ruby>busy<rt>ビジィ</rt></ruby>で<ruby>過去形<rt>かこけい</rt></ruby>は <ruby>were<rt></rt></ruby> <ruby>busy<rt>ビジィ</rt></ruby>がくる。"
+    },
+     {
+      question:"18-6 あなたたちは<ruby>昨年<rt>さくねん</rt></ruby>、クラスメートでしたか。",
+      options:["<ruby>Was<rt>ワズ</rt></ruby> <ruby>you<rt>ユー</rt></ruby> <ruby>classmates<rt>クラスメイツ</rt></ruby> <ruby>last<rt>ラスト</rt></ruby> <ruby>year<rt>イヤー</rt></ruby>.",
+      　　　　"<ruby>are<rt>アー</rt></ruby> <ruby>you<rt>ユー</rt></ruby> <ruby>classmates<rt>クラスメイツ</rt></ruby> <ruby>last<rt>ラスト</rt></ruby> <ruby>year<rt>イヤー</rt></ruby>.",
+      　　　　"<ruby>Were<rt>ワー</rt></ruby> <ruby>you<rt>ユー</rt></ruby> <ruby>classmates<rt>クラスメイツ</rt></ruby> <ruby>last<rt>ラスト</rt></ruby> <ruby>year<rt>イヤー</rt></ruby>.",
+      　　　　],
+      correctAnswer:2,
+      advice: "<ruby>主語<rt>しゅご</rt></ruby>が <ruby>you<rt>ユー</rt></ruby>なので、<ruby>be動詞<rt>ビィどうし</rt></ruby>は、<ruby>are<rt>アー</rt></ruby>。 <ruby>過去形<rt>かこけい</rt></ruby>は<ruby>were<rt>ワー</rt></ruby>になる。さらに<ruby>疑問文<rt>ぎもんぶん</rt></ruby>なので、<ruby>一番前<rt>いちばんまえ</rt></ruby>にだす。"
+    },
+    {
+      question:"19-7 <ruby>私<rt>わたし</rt></ruby>は<ruby>数学<rt>すうがく</rt></ruby>がとても<ruby>好<rt>すく</rt></ruby>きです。",
+      options:["<ruby>I<rt>アイ</rt></ruby> <ruby>likes<rt>ライクス</rt></ruby> <ruby>math<rt>マス/rt></ruby> <ruby>very<rt>ベリィ</rt></ruby> <ruby>much<rt>マッチ</rt></ruby>.",
+      　　　　"<ruby>I<rt>アイ</rt></ruby> <ruby>like<rt>ライク</rt></ruby> <ruby>math<rt>マス/rt></ruby> <ruby>very<rt>ベリィ</rt></ruby> <ruby>much<rt>マッチ</rt></ruby>.",
+      　　　　"<ruby>I<rt>アイ</rt></ruby> <ruby>liked<rt>ライクト</rt></ruby> <ruby>math<rt>マス/rt></ruby> <ruby>very<rt>ベリィ</rt></ruby> <ruby>much<rt>マッチ</rt></ruby>.",
+      　　　　],
+      correctAnswer:1,
+      advice: "<ruby>主語<rt>しゅご</rt></ruby>が<ruby>I,You<rt>アイ、ユー</rt></ruby>、<ruby>複数形<rt>ふくすうけい</rt></ruby>のときは<ruby>一般動詞<rt>いっぱんどうし</rt></ruby>に<ruby>s<rt>エス</rt></ruby>はつかない。"
+    },
+     {
+      question:"20-7 <ruby>get<rt>ゲット</rt></ruby> <ruby>up<rt>アップ</rt></ruby> の<ruby>意味<rt>いみく</rt></ruby>は？",
+      options:["<ruby>起<rt>お</rt></ruby>きる ",
+      　　　　"<ruby>逃<rt>に</rt></ruby>げる ",
+      　　　　"げたを<ruby>履<rt>は</rt></ruby>く",
+      　　　　],
+      correctAnswer:0,
+      advice: "<ruby>get<rt>ゲット</rt></ruby> <ruby>up<rt>アップ</rt></ruby>は、<ruby>起<rt>お</rt></ruby>きるだよ！。"
+    },
+    {
+      question:"21-7 <ruby>彼<rt>かれ</rt></ruby>は<ruby>毎朝<rt>まいあさ</rt></ruby><ruby>早<rt>はやく</rt></ruby>く<ruby>起<rt>お</rt></ruby>きます。",
+      options:["<ruby>He<rt>ヒー</rt></ruby> <ruby>get<rt>ゲット</rt></ruby> <ruby>up<rt>アップ</rt></ruby> <ruby>early<rt>アーリィ</rt></ruby> <ruby>every<rt>エブリィ</rt></ruby> <ruby>morning<rt>モーニング</rt></ruby>. ",
+      　　　　"<ruby>He<rt>ヒー</rt></ruby> <ruby>gets<rt>ゲッツ</rt></ruby> <ruby>up<rt>アップ</rt></ruby> <ruby>early<rt>アーリィ</rt></ruby> <ruby>every<rt>エブリィ</rt></ruby> <ruby>morning<rt>モーニング</rt></ruby>. ",
+      　　　　"<ruby>He<rt>ヒー</rt></ruby> <ruby>got<rt>ゴット</rt></ruby> <ruby>up<rt>アップ</rt></ruby> <ruby>early<rt>アーリィ</rt></ruby> <ruby>every<rt>エブリィ</rt></ruby> <ruby>morning<rt>モーニング</rt></ruby>. ",
+      　　　　],
+      correctAnswer:1,
+      advice: "<ruby>主語<rt>しゅご</rt></ruby>が<ruby> <ruby>He,She, It<rt>ヒィ シー イット</rt></ruby>のときだけ<ruby>-s(es)<rt>エス、イーエス</rt></ruby>が<ruby>付<rt>つ</rt></ruby>くよ。これを<ruby>三単現<rt>さんたんげん</rt></ruby>（<ruby>三人称、単単、現在<rt>さんにんしょうたんすうげんざい</rt></ruby>）の<ruby>s<rt>エス</rt></ruby>というよ。"
+    },
+    {
+      question:"22-7 <ruby>sometimes<rt>サムタイムズ</rt></ruby> の<ruby>意味<rt>いみ</rt></ruby>は？",
+      options:["いつも ",
+      　　　　"たまに",
+      　　　　"ときどき",
+      　　　　],
+      correctAnswer:2,
+      advice: "<ruby>sometimes<rt>サムタイムズ</rt></ruby>の<ruby>意味<rt>いみ</rt></ruby>は、<ruby>時々<rt>ときどき</rt></ruby>だよん！"
+    },
+     {
+      question:"23-7 <ruby>彼<rt>かれ</rt></ruby>らはときどき<ruby>昼食<rt>ちゅうしょく</rt></ruby>を<ruby>料理<rt>りょうり</rt></ruby>します。",
+      options:["<ruby>They<rt>ゼイ</rt></ruby> <ruby>sometimes<rt>サムタイムズ</rt></ruby> <ruby>cooked<rt>クックト</rt></ruby> <ruby>lunch<rt>ランチ</rt></ruby>.",
+      　　　　"<ruby>They<rt>ゼイ</rt></ruby> <ruby>sometimes<rt>サムタイムズ</rt></ruby> <ruby>cook<rt>クック</rt></ruby> <ruby>lunch<rt>ランチ</rt></ruby>. ",
+      　　　　"<ruby>They<rt>ゼイ</rt></ruby> <ruby>sometimes<rt>サムタイムズ</rt></ruby> <ruby>cooks<rt>クックス</rt></ruby> <ruby>lunch<rt>ランチ</rt></ruby>. ",
+      　　　　],
+      correctAnswer:1,
+      advice: "<ruby>主語<rt>しゅご</rt></ruby>が<ruby>I,You<rt>アイ、ユー</rt></ruby>、<ruby>複数形<rt>ふくすうけい</rt></ruby>のときは<ruby>一般動詞<rt>いっぱんどうし</rt></ruby>に<ruby>s<rt>エス</rt></ruby>はつかない。"
+    },
+    {
+      question:"24-7 <ruby>temple<rt>テンプル</rt></ruby> の<ruby>意味<rt>いみ</rt></ruby>は？",
+      options:["<ruby>寺<rt>てら</rt></ruby> ",
+      　　　　"<ruby>天<rt>てん</rt></ruby>ぷら",
+      　　　　"<ruby>神社<rt>じんじゃ</rt></ruby>",
+      　　　　],
+      correctAnswer:0,
+      advice: "<ruby>temple<rt>テンプル</rt></ruby> の<ruby>意味<rt>いみ</rt></ruby>は、<ruby>寺<rt>てら</rt></ruby>だよん！ "
+    },
+     {
+      question:"25-7 <ruby>京都<rt>きょうと</rt></ruby>にはたくさんの<ruby>寺<rt>てらく</rt></ruby>があります。",
+      options:["<ruby>Kyoto<rt>キョウト</rt></ruby> <ruby>have<rt>ハブ</rt></ruby> <ruby>many<rt>メニィ</rt></ruby> <ruby>temples<rt>テンプルズ</rt></ruby>. ",
+      　　　　"<ruby>Kyoto<rt>キョウト</rt></ruby> <ruby>had<rt>ハド</rt></ruby> <ruby>many<rt>メニィ</rt></ruby> <ruby>temples<rt>テンプルズ</rt></ruby>. ",
+      　　　　"<ruby>Kyoto<rt>キョウト</rt></ruby> <ruby>has<rt>ハズ</rt></ruby> <ruby>many<rt>メニィ</rt></ruby> <ruby>temples<rt>テンプルズ</rt></ruby>. ",
+      　　　　],
+      correctAnswer:2,
+      advice: "<ruby>Kyoto<rt>キョウト</rt></ruby>は、<ruby>単数<rt>たんすう</rt></ruby>なので、<ruby>動詞<rt>どうし</rt></ruby>に<ruby>s<rt>エス</rt></ruby>がつくよ。"
+    },
+     {
+      question:"26-7 マイクは<ruby>月曜日<rt>げつようび</rt></ruby>にテニスを<ruby>練習<rt>れんしゅう</rt></ruby>します。",
+      options:["<ruby>Mike<rt>マイク</rt></ruby> <ruby>practice<rt>プラクティス</rt></ruby> <ruby>tennis<rt>テニス</rt></ruby> <ruby>on<rt>オン</rt></ruby> <ruby>Monday<rt>マンディ</rt></ruby>. ",
+      　　　　"<ruby>Mike<rt>マイク</rt></ruby> <ruby>practices<rt>プラクテシーズ</rt></ruby> <ruby>tennis<rt>テニス</rt></ruby> <ruby>on<rt>オン</rt></ruby> <ruby>Monday<rt>マンディ</rt></ruby>. ",
+      　　　　"<ruby>Mike<rt>マイク</rt></ruby> <ruby>practiced<rt>プラクテシード</rt></ruby> <ruby>tennis<rt>テニス</rt></ruby> <ruby>on<rt>オン</rt></ruby> <ruby>Monday<rt>マンディ</rt></ruby>. ",
+      　　　　],
+      correctAnswer:1,
+      advice: "<ruby>Mike<rt>マイク</rt></ruby>の<ruby>代名詞<rt>だいめいし</rt></ruby>は <ruby>he<rt>ヒィ</rt></ruby>なので、<ruby>動詞<rt>どうし</rt></ruby>に<ruby>s<rt>エス</rt></ruby>が<ruby>付<rt>つ</rt></ruby>くよ。"
+    },
+    {
+      question:"27-8 <ruby>私<rt>わたし</rt></ruby>はピアノを<ruby>弾<rt>ひ</rt></ruby>きません。",
+      options:["<ruby>I<rt>アイ</rt></ruby> <ruby>don't<rt>ドンツ</rt></ruby>　<ruby>play<rt>プレイ</rt></ruby> <ruby>the<rt>ザ</rt></ruby> <ruby>piano<rt>ピアノ</rt></ruby>. ",
+      　　　　"<ruby>I<rt>アイ</rt></ruby> <ruby>doesn't<rt>ダズンツ</rt></ruby>　<ruby>play<rt>プレイ</rt></ruby> <ruby>the<rt>ザ</rt></ruby> <ruby>piano<rt>ピアノ</rt></ruby>.",
+      　　　　"<ruby>I<rt>アイ</rt></ruby> <ruby>haven't<rt>ハブンツ</rt></ruby>　<ruby>play<rt>プレイ</rt></ruby> <ruby>the<rt>ザ</rt></ruby> <ruby>piano<rt>ピアノ</rt></ruby>.",
+      　　　　],
+      correctAnswer:0,
+      advice: "<ruby>主語<rt>しゅご</rt></ruby>が<ruby>I,You<rt>アイ、ユー</rt></ruby>、<ruby>一般動詞<rt>いっぱんどうし</rt></ruby>の<ruby>否定文<rt>ひていぶん</rt></ruby>は<ruby>don't<rt>ドンツ</rt></ruby>で<ruby>否定<rt>ひてい</rt></ruby>する。"
+    },
+    {
+      question:"28-8 <ruby>彼<rt>かれ</rt></ruby>は<ruby>車<rt>くるまく/rt></ruby>を持っていません。",
+      options:["<ruby>He<rt>ヒィ</rt></ruby> <ruby>don't<rt>ドンツ</rt></ruby>　<ruby>have<rt>ハブ</rt></ruby> <ruby>a<rt>ア</rt></ruby> <ruby>car<rt>カー</rt></ruby>.",
+      　　　　"<ruby>He<rt>ヒィ</rt></ruby> <ruby>doesn't<rt>ダズンツ</rt></ruby>　<ruby>have<rt>ハブ</rt></ruby> <ruby>a<rt>ア</rt></ruby> <ruby>car<rt>カー</rt></ruby>.",
+      　　　　"<ruby>He<rt>ヒィ</rt></ruby> <ruby>haven't<rt>ハブンツ</rt></ruby>　<ruby>have<rt>ハブ</rt></ruby> <ruby>a<rt>ア</rt></ruby> <ruby>car<rt>カー</rt></ruby>.",
+      　　　　],
+      correctAnswer:1,
+      advice: "<ruby>主語<rt>しゅご</rt></ruby>が<ruby> <ruby>He,She, It<rt>ヒィ シー イット</rt></ruby>のとき、<ruby>否定文<rt>ひていぶん</rt></ruby>は<ruby>doesn't<rt>ダズンツ</rt></ruby>になる。"
+    },
+    {
+      question:"29-8 あなたは<ruby>新<rt>あたら</rt></ruby>しいボールが<ruby>欲<rt>ほ/rt></ruby>しいですか。",
+      options:["<ruby>Have<rt>ハブ</rt></ruby> <ruby>you<rt>ユー</rt></ruby>　<ruby>want<rt>ウォント</rt></ruby> <ruby>new<rt>ニュー</rt></ruby> <ruby>balls<rt>ボールズ</rt></ruby>?",
+      　　　　"<ruby>Does<rt>ダズ</rt></ruby> <ruby>you<rt>ユー</rt></ruby>　<ruby>want<rt>ウォント</rt></ruby> <ruby>new<rt>ニュー</rt></ruby> <ruby>balls<rt>ボールズ</rt></ruby>?",
+      　　　　"<ruby>Do<rt>ドゥ</rt></ruby> <ruby>you<rt>ユー</rt></ruby>　<ruby>want<rt>ウォント</rt></ruby> <ruby>new<rt>ニュー</rt></ruby> <ruby>balls<rt>ボールズ</rt></ruby>?",
+      　　　　],
+      correctAnswer:2,
+      advice: "<ruby>主語<rt>しゅご</rt></ruby>が<ruby>I,You<rt>アイ、ユー</rt></ruby>、<ruby>複数形<rt>ふくすうけい</rt></ruby>のときは<ruby>一般動詞<rt>いっぱんどうし</rt></ruby>の<ruby>疑問文<rt>ぎもんぶん</rt></ruby>は<ruby>Do<rt>ドゥ</rt></ruby>がつく。"
+    },
+     {
+      question:"30-8 マイクは<ruby>毎朝早<rt>まいあさはや</rt></ruby>くに<ruby>学校<rt>がっこう</rt></ruby>に<ruby>来<rt>き</rt></ruby>ますか。",
+      options:["<ruby>Does<rt>ダズ</rt></ruby> <ruby>Mike<rt>マイク</rt></ruby>　<ruby>come<rt>カム</rt></ruby> <ruby>to<rt>トゥ</rt></ruby> <ruby>school<rt>スクール</rt></ruby> <ruby>early<rt>アーリィ</rt></ruby> <ruby>every<rt>エブリィ</rt></ruby> <ruby>morning<rt>モーニング</rt></ruby>?",
+      　　　　"<ruby>Do<rt>ドゥ</rt></ruby> <ruby>Mike<rt>マイク</rt></ruby>　<ruby>come<rt>カム</rt></ruby> <ruby>to<rt>トゥ</rt></ruby> <ruby>school<rt>スクール</rt></ruby> <ruby>early<rt>アーリィ</rt></ruby> <ruby>every<rt>エブリィ</rt></ruby> <ruby>morning<rt>モーニング</rt></ruby>?",
+      　　　　"<ruby>Has<rt>ハズ</rt></ruby> <ruby>Mike<rt>マイク</rt></ruby>　<ruby>come<rt>カム</rt></ruby> <ruby>to<rt>トゥ</rt></ruby> <ruby>school<rt>スクール</rt></ruby> <ruby>early<rt>アーリィ</rt></ruby> <ruby>every<rt>エブリィ</rt></ruby> <ruby>morning<rt>モーニング</rt></ruby>?",
+      　　　　],
+      correctAnswer:0,
+      advice: "<ruby>Mike<rt>マイク</rt></ruby>の<ruby>代名詞<rt>だいめいし</rt></ruby>は <ruby>he<rt>ヒィ</rt></ruby>なので、、<ruby>疑問文<rt>ぎもんぶん</rt></ruby>は<ruby>does<rt>ダズ</rt></ruby>が<ruby>一番前<rt>いちばんまえ</rt></ruby>にくる。"
+    },
+     {
+      question:"31-9 <ruby>call<rt>コール</rt></ruby>（よぶ）の<ruby>過去形<rt>かこけい</rt></ruby>はどれか。",
+      options:["<ruby>call<rt>コール</rt></ruby> ",
+      　　　　"<ruby>called<rt>コールド</rt></ruby> ",
+      　　　　"<ruby>coll<rt>コル</rt></ruby> ",
+      　　　　],
+      correctAnswer:1,
+      advice: "<ruby>call<rt>コール</rt></ruby>（よぶ）の<ruby>過去形<rt>かこけい</rt></ruby>は<ruby>called<rt>コールド</rt></ruby>です。"
+    },
+     {
+      question:"32-9 <ruby>study<rt>スタディ</rt></ruby> <ruby>（勉強<rt>べんきょう</rt></ruby>する）の<ruby>過去形<rt>かこけい</rt></ruby>はどれか。",
+      options:["<ruby>studied<rt>スタディド</rt></ruby> ",
+      　　　　"<ruby>studyed<rt>スタディド</rt></ruby> ",
+      　　　　"<ruby>study<rt>スタディ</rt></ruby> ",
+      　　　　],
+      correctAnswer:0,
+      advice: "<ruby>study<rt>スタディ</rt></ruby> <ruby>（勉強<rt>べんきょう</rt></ruby>する）の<ruby>過去形<rt>かこけい</rt></ruby>は、<ruby>yの前<rt>ワイ まえ</rt></ruby>が<ruby>d 子音<rt>ディ しおん</rt></ruby>なので<ruby>yをi<rt>ワイ  アイ</rt></ruby>にかえ、<ruby>ed<rt>イーディ</rt></ruby>をつけ、<ruby>studied<rt>スタディド</rt></ruby>にします。"
+    },
+    {
+      question:"33-9 <ruby>play<rt>プレイ</rt></ruby>（する）の<ruby>過去形<rt>かこけい</rt></ruby>はどれか。",
+      options:["<ruby>play<rt>プレイ</rt></ruby> ",
+      　　　　"<ruby>plaied<rt>プレイド</rt></ruby> ",
+      　　　　"<ruby>played<rt>プレイド</rt></ruby> ",
+      　　　　],
+      correctAnswer:2,
+      advice: "<ruby>play<rt>プレイ</rt></ruby>（する）の<ruby>過去形<rt>かこけい</rt></ruby>は、<ruby>y<rt>ワイ</rt></ruby>の <ruby>前<rt>まえ</rt></ruby>が<ruby> a 母音<rt>エィぼいん</rt></ruby>なので、<ruby>形<rt>かたち</rt></ruby>は<ruby>変<rt>か</rt></ruby>えず、<ruby>ed<rt>イーディ</rt></ruby>を<ruby>付<rt>つ</rt></ruby>けるだけ！"
+    },
+    {
+      question:"34-9 <ruby>go<rt>ゴゥ</rt></ruby> <ruby>（行<rt>い</rt></ruby>く）の<ruby>過去形<rt>かこけい</rt></ruby>はどれか。",
+      options:["<ruby>goed<rt>ゴード</rt></ruby> ",
+      　　　　"<ruby>went<rt>ウェント</rt></ruby> ",
+      　　　　"<ruby>gone<rt>ゴーン</rt></ruby> ",
+      　　　　],
+      correctAnswer:1,
+      advice: "<ruby>go<rt>ゴゥ</rt></ruby> <ruby>（行<rt>い</rt></ruby>く）の<ruby>過去形<rt>かこけい</rt></ruby>は<ruby>went<rt>ウェント</rt></ruby>です。<ruby>形が変<rt>かたち か</rt></ruby>わるので、<ruby>不規則動詞<rt>ふきそくどうし</rt></ruby>といいます。"
+    },
+     {
+      question:"35-9 <ruby>come<rt>カム</rt></ruby> <ruby>(来<rt>く</rt></ruby>る）の<ruby>過去形<rt>かこけい</rt></ruby>はどれか。",
+      options:["<ruby>come<rt>カム</rt></ruby> ",
+      　　　　"<ruby>came<rt>ケイム</rt></ruby> ",
+      　　　　"<ruby>comed<rt>カムド</rt></ruby> ",
+      　　　　],
+      correctAnswer:1,
+      advice: "<ruby>come<rt>カム</rt></ruby> <ruby>(来<rt>く</rt></ruby>る）の<ruby>過去形<rt>かこけい</rt></ruby>は<ruby>came<rt>ケイム</rt></ruby>です。<ruby>不規則動詞<rt>ふきそくどうし</rt></ruby>です。"
+    },
+     {
+      question:"36-9 <ruby>make<rt>メイク</rt></ruby> <ruby>（作<rt>つく</rt></ruby>る）の<ruby>過去形<rt>かこけい</rt></ruby>はどれか。",
+      options:["<ruby>made<rt>メイド</rt></ruby> ",
+      　　　　"<ruby>maked<rt>メイクト</rt></ruby> ",
+      　　　　"<ruby>make<rt>メイク</rt></ruby> ",
+      　　　　],
+      correctAnswer:0,
+      advice: " <ruby>make<rt>メイク</rt></ruby> <ruby>（作<rt>つく</rt></ruby>る）の<ruby>過去形<rt>かこけい</rt></ruby>は<ruby>made<rt>メイド</rt></ruby>です。<ruby>不規則動詞<rt>ふきそくどうし</rt></ruby>です。"
+    },
+     {
+      question:"37-9 <ruby>私<rt>わたし</rt></ruby>は<ruby>昨日<rt>きのう</rt></ruby>、テレビを<ruby>見<rt>み</rt></ruby>ました。",
+      options:["<ruby>I<rt>アイ</rt></ruby> <ruby>watches<rt>ウオッチ</rt></ruby> <ruby>TV<rt>ティビー</rt></ruby> <ruby>yesterday<rt>イエスタディ</rt></ruby> .",
+      　　　　"<ruby>I<rt>アイ</rt></ruby> <ruby>watch<rt>ウオッチ</rt></ruby> <ruby>TV<rt>ティビー</rt></ruby> <ruby>yesterday<rt>イエスタディ</rt></ruby> .",
+      　　　　"<ruby>I<rt>アイ</rt></ruby> <ruby>watched<rt>ウオッチト</rt></ruby> <ruby>TV<rt>ティビー</rt></ruby> <ruby>yesterday<rt>イエスタディ</rt></ruby> .",
+      　　　　],
+      correctAnswer:2,
+      advice: "<ruby>watch<rt>ウオッチ</rt></ruby>の<ruby>過去形<rt>かこけい</rt></ruby>は、<ruby>ed<rt>イーディ</rt></ruby>を<ruby>付<rt>つ</rt></ruby>け<ruby>発音はwatched<rt>はつおん ウオッチト</rt></ruby>になります 。"
+    },
+     {
+      question:"38-9 <ruby>彼<rt>かれ</rt></ruby>はこの<ruby>前<rt>まえ</rt></ruby>の<ruby>日曜日<rt>にちようび</rt></ruby>に<ruby>昼食<rt>ちゅうしょく</rt></ruby>を<ruby>料理<rt>りょうり</rt></ruby>しました。",
+      options:["<ruby>He<rt>ヒィ</rt></ruby> <ruby>cooked<rt>クックト</rt></ruby> <ruby>lunch<rt>ランチ</rt></ruby> <ruby>last<rt>ラスト</rt></ruby> <ruby>Sunday<rt>サンディ</rt></ruby> .",
+      　　　　"<ruby>He<rt>ヒィ</rt></ruby> <ruby>cook<rt>クック</rt></ruby> <ruby>lunch<rt>ランチ</rt></ruby> <ruby>last<rt>ラスト</rt></ruby> <ruby>Sunday<rt>サンディ</rt></ruby> .",
+      　　　　"<ruby>He<rt>ヒィ</rt></ruby> <ruby>cookted<rt>ククテッド</rt></ruby> <ruby>lunch<rt>ランチ</rt></ruby> <ruby>last<rt>ラスト</rt></ruby> <ruby>Sunday<rt>サンディ</rt></ruby> .",
+      　　　　],
+      correctAnswer:0,
+      advice: "<ruby>cook<rt>クック</rt></ruby>の<ruby>過去形<rt>かこけい</rt></ruby>は、<ruby>cooked<rt>クックト</rt></ruby>で、クックトと<ruby>発音<rt>はつおん</rt></ruby>します。"
+    },
+    {
+      question:"39-9 <ruby>彼<rt>かれ</rt></ruby>はこの<ruby>自動車<rt>じどうしゃ</rt></ruby>を<ruby>使<rt>つか</rt></ruby>いましたか。",
+      options:["<ruby>Did<rt>ディド</rt></ruby> <ruby>he<rt>ヒィ</rt></ruby> <ruby>used<rt>ユーズド</rt></ruby> <ruby>this<rt>ズィス</rt></ruby> <ruby>bike<rt>バイク</rt></ruby> ?",
+      　　　　"<ruby>Did<rt>ディド</rt></ruby> <ruby>he<rt>ヒィ</rt></ruby> <ruby>uses<rt>ユーズィズ</rt></ruby> <ruby>this<rt>ズィス</rt></ruby> <ruby>bike<rt>バイク</rt></ruby> ?",
+      　　　　"<ruby>Did<rt>ディド</rt></ruby> <ruby>he<rt>ヒィ</rt></ruby> <ruby>use<rt>ユーズ</rt></ruby> <ruby>this<rt>ズィス</rt></ruby> <ruby>bike<rt>バイク</rt></ruby> ?",
+      　　　　],
+      correctAnswer:2,
+      advice: "<ruby>過去形<rt>かこけい</rt></ruby>の<ruby>疑問文<rt>ぎもんぶん</rt></ruby>は<ruby>一番前<rt>いちばんまえ</rt></ruby>に<ruby>Did<rt>ディド</rt></ruby>をつかい、＋<ruby>動詞は原型<rt>どうし げんけい</rt></ruby>です。"
+    },
+     {
+      question:"40-10 <ruby>座<rt>すわ</rt></ruby>りなさい。",
+      options:["<ruby>Sits<rt>シッツ</rt></ruby> <ruby>down<rt>ダウン</rt></ruby>.",
+      　　　　"<ruby>Sit<rt>シット</rt></ruby> <ruby>down<rt>ダウン</rt></ruby>.",
+      　　　　"<ruby>Sitted<rt>シィテッド</rt></ruby> <ruby>down<rt>ダウン</rt></ruby>.",
+      　　　　],
+      correctAnswer:1,
+      advice: "<ruby>命令文<rt>めいれいぶん</rt></ruby>は、<ruby>動詞<rt>どうし</rt></ruby>の<ruby>原型<rt>げんけい</rt></ruby>で<ruby>文<rt>ぶん</rt></ruby>をはじめる。"
+    },
+     {
+      question:"41-10 <ruby>静<rt>しず</rt></ruby>かにしてください。",
+      options:["<ruby>Be<rt>ビィ</rt></ruby> <ruby>quiet<rt>クワイエット</rt></ruby>, <ruby>please<rt>プリーズド</rt></ruby> .",
+      　　　　"<ruby>Are<rt>アー</rt></ruby> <ruby>quiet<rt>クワイエット</rt></ruby>, <ruby>please<rt>プリーズド</rt></ruby> .",
+      　　　　"<ruby>Do<rt>ドゥ</rt></ruby> <ruby>quiet<rt>クワイエット</rt></ruby>, <ruby>please<rt>プリーズド</rt></ruby> .",
+      　　　　],
+      correctAnswer:0,
+      advice: "<ruby>be<rt>ビィ</rt></ruby> <ruby>動詞<rt>どうし</rt></ruby>の<ruby>原型<rt>げんけい</rt></ruby>は、<ruby>be<rt>ビィ</rt></ruby>です。これで<ruby>文<rt>ぶん</rt></ruby>をはじめます。"
+    },
+    {
+      question:"42-10 この<ruby>川<rt>かわ</rt></ruby>で<ruby>泳<rt>およ</rt></ruby>いではいけません。",
+      options:["<ruby>Doesn't<rt>ダズンツ</rt></ruby> <ruby>swim<rt>スイム</rt></ruby> <ruby>in<rt>イン</rt></ruby> <ruby>this<rt>ズィス</rt></ruby> <ruby>river<rt>リバー</rt></ruby> .",
+      　　　　"<ruby>Didn't<rt>ディドンツ</rt></ruby> <ruby>swim<rt>スイム</rt></ruby> <ruby>in<rt>イン</rt></ruby> <ruby>this<rt>ズィス</rt></ruby> <ruby>river<rt>リバー</rt></ruby> .",
+      　　　　"<ruby>Don't<rt>ドンツ</rt></ruby> <ruby>swim<rt>スイム</rt></ruby> <ruby>in<rt>イン</rt></ruby> <ruby>this<rt>ズィス</rt></ruby> <ruby>river<rt>リバー</rt></ruby> .",
+      　　　　],
+      correctAnswer:2,
+      advice: "～してはいけないと<ruby>禁止<rt>きんし</rt></ruby>するときは、<ruby>Dnn't<rt>ドンツ</rt></ruby>＋<ruby>動詞<rt>どうし</rt></ruby>の <ruby>原型<rt>げんけい</rt></ruby>をつかいます。"
+    },
+     {
+      question:"43-10 いっしょに<ruby>昼食<rt>ちゅうしょく</rt></ruby>を<ruby>食<rt>た</rt></ruby>べましょう。",
+      options:["<ruby>Don't<rt>ドンツ</rt></ruby> <ruby>have<rt>ハブ</rt></ruby> <ruby>lunch<rt>ランチ</rt></ruby> <ruby>together<rt>トゲザー</rt></ruby> .",
+      　　　　"<ruby>Let's<rt>レッツ</rt></ruby> <ruby>have<rt>ハブ</rt></ruby> <ruby>lunch<rt>ランチ</rt></ruby> <ruby>together<rt>トゲザー</rt></ruby> .",
+      　　　　"<ruby>Do<rt>ドゥ</rt></ruby> <ruby>have<rt>ハブ</rt></ruby> <ruby>lunch<rt>ランチ</rt></ruby> <ruby>together<rt>トゲザー</rt></ruby> .",
+      　　　　],
+      correctAnswer:1,
+      advice: "～しましょうと<ruby>相手<rt>あいて</rt></ruby>をさそう<ruby>場合<rt>ばあい</rt></ruby>は、<ruby>Let's<rt>レッツ</rt></ruby>+<ruby>動詞<rt>どうし</rt></ruby>の<ruby>原型<rt>げんけい</rt></ruby>がくる。"
+    },
+     {
+      question:"44-10 <ruby>窓<rt>まどく</rt></ruby>を<ruby>開<rt>あ</rt></ruby>けてください。",
+      options:["<ruby>Don't<rt>ドンツ</rt></ruby> <ruby>open<rt>オープン</rt></ruby> <ruby>the<rt>ザ</rt></ruby> <ruby>window<rt>ウインドウ</rt></ruby> .",
+      　　　　"<ruby>Let's<rt>レッツ</rt></ruby> <ruby>open<rt>オープン</rt></ruby> <ruby>the<rt>ザ</rt></ruby> <ruby>window<rt>ウインドウ</rt></ruby> .",
+      　　　　"<ruby>Please<rt>プリーズ</rt></ruby> <ruby>open<rt>オープン</rt></ruby> <ruby>the<rt>ザ</rt></ruby> <ruby>window<rt>ウインドウ</rt></ruby> .",
+      　　　　],
+      correctAnswer:2,
+      advice: "～してくださいとていねいに<ruby>言<rt>い</rt></ruby>う<ruby>場合<rt>ばあい</rt></ruby>は、<ruby>please<rt>プリーズ</rt></ruby>をつかう。"
+    },
+    {
+      question:"45-10 ここで<ruby>走<rt>はし</rt></ruby>ってはいけません。",
+      options:["<ruby>Don't<rt>ドンツ</rt></ruby> <ruby>run<rt>ラン</rt></ruby> <ruby>here<rt>ヒヤ</rt></ruby> .",
+      　　　　"<ruby>Doesn't<rt>ダズンツ</rt></ruby> <ruby>run<rt>ラン</rt></ruby> <ruby>here<rt>ヒヤ</rt></ruby> .",
+      　　　　"<ruby>Haven't<rt>ハブンツ</rt></ruby> <ruby>run<rt>ラン</rt></ruby> <ruby>here<rt>ヒヤ</rt></ruby> .",
+      　　　　],
+      correctAnswer:0,
+      advice: "～してはいけないと<ruby>禁止<rt>きんし</rt></ruby>するときは、<ruby>Dnn't<rt>ドンツ</rt></ruby>＋<ruby>動詞<rt>どうし</rt></ruby>の <ruby>原型<rt>げんけい</rt></ruby>をつかう。"
+    },
+    {
+      question:"46-10 <ruby>遅<rt>おく</rt></ruby>れないでください。",
+      options:["<ruby>Doesn't<rt>ダズンツ</rt></ruby> <ruby>be<rt>ビィ</rt></ruby> <ruby>late<rt>レイト</rt></ruby> <ruby>please<rt>プリーズ</rt></ruby>.",
+      　　　　"<ruby>Don't<rt>ドンツ</rt></ruby> <ruby>be<rt>ビィ</rt></ruby> <ruby>late<rt>レイト</rt></ruby> <ruby>please<rt>プリーズ</rt></ruby>.",
+      　　　　"<ruby>Haven't<rt>ハブンツ</rt></ruby> <ruby>be<rt>ビィ</rt></ruby> <ruby>late<rt>レイト</rt></ruby> <ruby>please<rt>プリーズ</rt></ruby>.",,
+      　　　　],
+      correctAnswer:1,
+      advice: "～してはいけないと<ruby>禁止<rt>きんし</rt></ruby>では、<ruby>Dnn't<rt>ドンツ</rt></ruby>＋<ruby>be動詞<rt>ビィどうし</rt></ruby>の<ruby>be<rt>ビィ</rt></ruby>がくる。"
+    },
+    {
+      question:"47-11 これは<ruby>何<rt>なん</rt></ruby>ですか。",
+      options:["<ruby>When<rt>ホエン</rt></ruby> <ruby>is<rt>イズ</rt></ruby> <ruby>this<rt>ズィス</rt></ruby> ?",
+      　　　　"<ruby>Where<rt>ホエア</rt></ruby> <ruby>is<rt>イズ</rt></ruby> <ruby>this<rt>ズィス</rt></ruby> ?",
+      　　　　"<ruby>What<rt>ホワット</rt></ruby> <ruby>is<rt>イズ</rt></ruby> <ruby>this<rt>ズィス</rt></ruby> ?",
+      　　　　],
+      correctAnswer:2,
+      advice: "<ruby>何<rt>なに</rt></ruby>は<ruby>What<rt>ホワット</rt></ruby>。<ruby>Where<rt>ホエア</rt></ruby>は、どこでだよ！"
+    },
+     {
+      question:"48-11 あなたはいつ<ruby>宿題<rt>しゅくだいく</rt></ruby>を<ruby>終<rt>お</rt></ruby>わらせましたか。",
+      options:["<ruby>Who<rt>フー</rt></ruby> <ruby>did<rt>ディド</rt></ruby> <ruby>you<rt>ユー</rt></ruby> <ruby>finish<rt>フィニッシュ</rt></ruby>  <ruby>your<rt>ユア</rt></ruby> <ruby>homework<rt>ホームワーク</rt></ruby> .",
+      　　　　"<ruby>Where<rt>ホエア</rt></ruby> <ruby>did<rt>ディド</rt></ruby> <ruby>you<rt>ユー</rt></ruby> <ruby>finish<rt>フィニッシュ</rt></ruby>  <ruby>your<rt>ユア</rt></ruby> <ruby>homework<rt>ホームワーク</rt></ruby> .",
+      　　　　"<ruby>When<rt>ホエン</rt></ruby> <ruby>did<rt>ディド</rt></ruby> <ruby>you<rt>ユー</rt></ruby> <ruby>finish<rt>フィニッシュ</rt></ruby>  <ruby>your<rt>ユア</rt></ruby> <ruby>homework<rt>ホームワーク</rt></ruby> .",
+      　　　　],
+      correctAnswer:2,
+      advice: "いつは、<ruby>When<rt>ホエン</rt></ruby>。<ruby>Who<rt>フー</rt></ruby>は、<ruby>誰<rt>だれ</rt></ruby>だよ。"
+    },
+     {
+      question:"49-11 マイクはどこに<ruby>住<rt>す</rt></ruby>んでいますか。",
+      options:["<ruby>Where<rt>ホエア</rt></ruby> <ruby>does<rt>ダズ</rt></ruby> <ruby>Mike<rt>マイク</rt></ruby> <ruby>live<rt>リブ</rt></ruby> ?",
+      　　　　"<ruby>When<rt>ホエン</rt></ruby> <ruby>does<rt>ダズ</rt></ruby> <ruby>Mike<rt>マイク</rt></ruby> <ruby>live<rt>リブ</rt></ruby> ?",
+      　　　　"<ruby>What<rt>ホワット</rt></ruby> <ruby>does<rt>ダズ</rt></ruby> <ruby>Mike<rt>マイク</rt></ruby> <ruby>live<rt>リブ</rt></ruby> ?",
+      　　　　],
+      correctAnswer:0,
+      advice: "どこには、<ruby>Where<rt>ホエア</rt></ruby>。<ruby>What<rt>ホワット</rt></ruby>は、<ruby>何<rt>なに</rt></ruby>だよ！"
+    },
+     {
+      question:"50-11 <ruby>彼女<rt>かのじょ</rt></ruby>はどうやってここに<ruby>来<rt>き</rt></ruby>ましたか。",
+      options:["<ruby>What<rt>ホワット</rt></ruby> <ruby>did<rt>ディド</rt></ruby> <ruby>she<rt>シー</rt></ruby> <ruby>come<rt>カム</rt></ruby>  <ruby>here<rt>ヒヤ</rt></ruby> .",
+      　　　　"<ruby>How<rt>ハウ</rt></ruby> <ruby>did<rt>ディド</rt></ruby> <ruby>she<rt>シー</rt></ruby> <ruby>come<rt>カム</rt></ruby>  <ruby>here<rt>ヒヤ</rt></ruby> .",
+      　　　　"<ruby>When<rt>ホエン</rt></ruby> <ruby>did<rt>ディド</rt></ruby> <ruby>she<rt>シー</rt></ruby> <ruby>come<rt>カム</rt></ruby>  <ruby>here<rt>ヒヤ</rt></ruby> .",
+      　　　　],
+      correctAnswer:1,
+      advice: "どうやっては、<ruby>How<rt>ハウ</rt></ruby>。<ruby>When<rt>ホエン</rt></ruby>は、いつだよ。"
+    },
+     {
+      question:"51-11 だれがこの<ruby>本<rt>ほん</rt></ruby>を<ruby>書<rt>か</rt></ruby>きましたか。",
+      options:["<ruby>What<rt>ホワット</rt></ruby> <ruby>wrote<rt>ロート</rt></ruby> <ruby>this<rt>ズィス</rt></ruby> <ruby>book<rt>ブック</rt></ruby> ?",
+      　　　　"<ruby>Who<rt>フー</rt></ruby> <ruby>wrote<rt>ロート</rt></ruby> <ruby>this<rt>ズィス</rt></ruby> <ruby>book<rt>ブック</rt></ruby> ?",
+      　　　　"<ruby>When<rt>フー</rt></ruby> <ruby>wrote<rt>ロート</rt></ruby> <ruby>this<rt>ズィス</rt></ruby> <ruby>book<rt>ブック</rt></ruby> ?",
+      　　　　],
+      correctAnswer:1,
+      advice: "だれがは、<ruby>Who<rt>フー</rt></ruby>だよ。 "
+    },
+     {
+      question:"52-11 <ruby>彼<rt>かれ</rt></ruby>はなぜ<ruby>帰宅<rt>きたく</rt></ruby>したのですか。",
+      options:["<ruby>How<rt>ハウ</rt></ruby> <ruby>did<rt>ディド</rt></ruby> <ruby>he<rt>ヒィ</rt></ruby> <ruby>go<rt>ゴー</rt></ruby>  <ruby>home<rt>ホーム</rt></ruby>",
+      　　　　"<ruby>What<rt>ホワット</rt></ruby> <ruby>did<rt>ディド</rt></ruby> <ruby>he<rt>ヒィ</rt></ruby> <ruby>go<rt>ゴー</rt></ruby>  <ruby>home<rt>ホーム</rt></ruby>",
+      　　　　"<ruby>Why<rt>ホワイ</rt></ruby> <ruby>did<rt>ディド</rt></ruby> <ruby>he<rt>ヒィ</rt></ruby> <ruby>go<rt>ゴー</rt></ruby>  <ruby>home<rt>ホーム</rt></ruby>",
+      　　　　],
+      correctAnswer:2,
+      advice: "なぜは、<ruby>Why<rt>ホワイ</rt></ruby>だよ。 "
+    },
+    {
+      question:"53-11 これはだれのノートですか。",
+      options:["<ruby>Whose<rt>フーズ</rt></ruby> <ruby>notebook<rt>ノートブック</rt></ruby> <ruby>is<rt>イズ</rt></ruby> <ruby>this<rt>ズィス</rt></ruby>?",
+      　　　　"<ruby>What<rt>ホワット</rt></ruby> <ruby>notebook<rt>ノートブック</rt></ruby> <ruby>is<rt>イズ</rt></ruby> <ruby>this<rt>ズィス</rt></ruby>?",
+      　　　　"<ruby>Who<rt>フー</rt></ruby> <ruby>notebook<rt>ノートブック</rt></ruby> <ruby>is<rt>イズ</rt></ruby> <ruby>this<rt>ズィス</rt></ruby>?",
+      　　　　],
+      correctAnswer:0,
+      advice: "だれのは、<ruby>Whose<rt>フーズ</rt></ruby>だよ。"
+    },
+    {
+      question:"54-12 <ruby>私<rt>わたし</rt></ruby>は<ruby>今<rt>いまく</rt></ruby>、<ruby>本<rt>ほん</rt></ruby>を<ruby>読<rt>よく</rt></ruby>んでいます。",
+      options:["<ruby>I<rt>アイ</rt></ruby> <ruby>am<rt>アム</rt></ruby> <ruby>read<rt>リード</rt></ruby> <ruby>a<rt>ア</rt></ruby>  <ruby>book<rt>ブック</rt></ruby>  <ruby>now<rt>ナウ</rt></ruby>.",
+      　　　　"<ruby>I<rt>アイ</rt></ruby> <ruby>am<rt>アム</rt></ruby> <ruby>reading<rt>リーディング</rt></ruby> <ruby>a<rt>ア</rt></ruby>  <ruby>book<rt>ブック</rt></ruby>  <ruby>now<rt>ナウ</rt></ruby>.",
+      　　　　"<ruby>I<rt>アイ</rt></ruby> <ruby>am<rt>アム</rt></ruby> <ruby>reads<rt>リーズ</rt></ruby> <ruby>a<rt>ア</rt></ruby>  <ruby>book<rt>ブック</rt></ruby>  <ruby>now<rt>ナウ</rt></ruby>.",
+      　　　　],
+      correctAnswer:1,
+      advice: "「～している」と<ruby>言<rt>い</rt></ruby>うときは<ruby>be動詞<rt>ビィどうし</rt></ruby>＋<ruby>動詞<rt>どうし</rt></ruby>の～<ruby>ing<rt>イング</rt></ruby><ruby>形<rt>けい</rt></ruby>がくるよ。"
+    },
+    {
+      question:"55-12 <ruby>彼<rt>かれ</rt></ruby>は<ruby>今<rt>いまく</rt></ruby>、 <ruby>公園<rt>こうえん</rt></ruby>で<ruby>走<rt>はし</rt></ruby>っています。",
+      options:["<ruby>He<rt>ヒィ</rt></ruby> <ruby>is<rt>イズ</rt></ruby> <ruby>ran<rt>ラン</rt></ruby> <ruby>in<rt>イン</rt></ruby>  <ruby>the<rt>ザ</rt></ruby>  <ruby>park<rt>パーク</rt></ruby>  <ruby>now<rt>ナウ</rt></ruby>.",
+      　　　　"<ruby>He<rt>ヒィ</rt></ruby> <ruby>runs<rt>ランズ</rt></ruby> <ruby>in<rt>イン</rt></ruby>  <ruby>the<rt>ザ</rt></ruby>  <ruby>park<rt>パーク</rt></ruby>  <ruby>now<rt>ナウ</rt></ruby>.",
+      　　　　"<ruby>He<rt>ヒィ</rt></ruby> <ruby>is<rt>イズ</rt></ruby> <ruby>running<rt>ランニング</rt></ruby> <ruby>in<rt>イン</rt></ruby>  <ruby>the<rt>ザ</rt></ruby>  <ruby>park<rt>パーク</rt></ruby>  <ruby>now<rt>ナウ</rt></ruby>.",
+      　　　　],
+      correctAnswer:2,
+      advice: "「～している」と<ruby>言<rt>い</rt></ruby>うときは<ruby>be動詞<rt>ビィどうし</rt></ruby>＋<ruby>動詞<rt>どうし</rt></ruby>の～<ruby>ing<rt>イング</rt></ruby><ruby>形<rt>けい</rt></ruby>がくるよ。"
+    },
+      {
+      question:"56-12 <ruby>今<rt>いま</rt></ruby>、<ruby>雨<rt>あめく</rt></ruby>は<ruby>降<rt>ふ</rt></ruby>っていません。",
+      options:["<ruby>It<rt>イット</rt></ruby> <ruby>is'nt<rt>イズンツ</rt></ruby> <ruby>raining<rt>レィニング</rt></ruby> <ruby>now<rt>ナウ</rt></ruby>.",
+      　　　　"<ruby>It<rt>イット</rt></ruby> <ruby>does'nt<rt>イズンツ</rt></ruby> <ruby>raining<rt>レィニング</rt></ruby> <ruby>now<rt>ナウ</rt></ruby>.",
+      　　　　"<ruby>It<rt>イット</rt></ruby> <ruby>does'nt<rt>ダズンツ</rt></ruby> <ruby>rain<rt>レイン</rt></ruby> <ruby>now<rt>ナウ</rt></ruby>.",
+      　　　　],
+      correctAnswer:0,
+      advice: "<ruby>進行形<rt>しんこうけい</rt></ruby>の<ruby>否定<rt>ひてい</rt></ruby>は、<ruby>be動詞<rt>ビィどうし</rt></ruby>に<ruby>not<rt>ノット</rt></ruby>をつけるよ。"
+    },
+    {
+      question:"57-12 <ruby>彼女<rt>かのじょ</rt></ruby>は<ruby>音楽<rt>おんがくく</rt></ruby>を<ruby>聞<rt>き</rt></ruby>いているところですか。",
+      options:["<ruby>Does<rt>ダズ</rt></ruby> <ruby>she<rt>シー</rt></ruby> <ruby>listening<rt>リスニング</rt></ruby> <ruby>to<rt>トゥ</rt></ruby>  <ruby>music<rt>ミュージック</rt></ruby>?",
+      　　　　"<ruby>Is<rt>イズ</rt></ruby> <ruby>she<rt>シー</rt></ruby> <ruby>listening<rt>リスニング</rt></ruby> <ruby>to<rt>トゥ</rt></ruby>  <ruby>music<rt>ミュージック</rt></ruby>?",
+      　　　　"<ruby>Do<rt>ドゥ</rt></ruby> <ruby>she<rt>シー</rt></ruby> <ruby>listening<rt>リスニング</rt></ruby> <ruby>to<rt>トゥ</rt></ruby>  <ruby>music<rt>ミュージック</rt></ruby>?",
+      　　　　],
+      correctAnswer:1,
+      advice: "<ruby>進行形<rt>しんこうけい</rt></ruby>の<ruby>疑問文<rt>ぎもんぶん</rt></ruby>は、<ruby>be動詞<rt>ビィどうし</rt></ruby>を<ruby>一番前<rt>いちばんまえ</rt></ruby>にもってきます。"
+    },
+     {
+      question:"58-12 <ruby>私<rt>わたし</rt></ruby>はそのとき<ruby>料理<rt>りょうりく</rt></ruby>していました。",
+      options:["<ruby>I<rt>アイ</rt></ruby> <ruby>am<rt>アム</rt></ruby> <ruby>cooking<rt>クッキング</rt></ruby> <ruby>then<rt>ゼン</rt></ruby>.",
+      　　　　"<ruby>I<rt>アイ</rt></ruby> <ruby>did<rt>ディド</rt></ruby> <ruby>cooking<rt>クッキング</rt></ruby> <ruby>then<rt>ゼン</rt></ruby>.",
+      　　　　"<ruby>I<rt>アイ</rt></ruby> <ruby>was<rt>ワズ</rt></ruby> <ruby>cooking<rt>クッキング</rt></ruby> <ruby>then<rt>ゼン</rt></ruby>.",
+      　　　　],
+      correctAnswer:2,
+      advice: "<ruby>進行形<rt>しんこうけい</rt></ruby>の<ruby>過去形<rt>かこけい</rt></ruby>は、<ruby>be動詞<rt>ビィどうし</rt></ruby>が<ruby>過去形<rt>かこけい</rt></ruby>にかわります。"
+    },
+     {
+      question:"59-12 <ruby>私<rt>わたし</rt></ruby>たちはそのとき、<ruby>映画<rt>えいがく</rt></ruby>を<ruby>見<rt>み</rt></ruby>ていました。",
+      options:["<ruby>We<rt>ウィ</rt></ruby> <ruby>were<rt>ワー</rt></ruby> <ruby>watching<rt>ウォッチング</rt></ruby> <ruby>a<rt>ア</rt></ruby> <ruby>movie<rt>ムービィ</rt></ruby> <ruby>at<rt>アット</rt></ruby> <ruby>that<rt>ザット</rt></ruby>  <ruby>time<rt>タイム</rt></ruby>.",
+      　　　　"<ruby>We<rt>ウィ</rt></ruby> <ruby>are<rt>アー</rt></ruby> <ruby>watching<rt>ウォッチング</rt></ruby> <ruby>a<rt>ア</rt></ruby> <ruby>movie<rt>ムービィ</rt></ruby> <ruby>at<rt>アット</rt></ruby> <ruby>that<rt>ザット</rt></ruby>  <ruby>time<rt>タイム</rt></ruby>.",
+      　　　　"<ruby>We<rt>ウィ</rt></ruby> <ruby>did<rt>ディド</rt></ruby> <ruby>watching<rt>ウォッチング</rt></ruby> <ruby>a<rt>ア</rt></ruby> <ruby>movie<rt>ムービィ</rt></ruby> <ruby>at<rt>アット</rt></ruby> <ruby>that<rt>ザット</rt></ruby>  <ruby>time<rt>タイム</rt></ruby>.",
+      　　　　],
+      correctAnswer:0,
+      advice: "そのときは、<ruby>過去形<rt>かこけい</rt></ruby>なので、<ruby>be動詞<rt>ビィどうし</rt></ruby>を<ruby>過去形<rt>かこけい</rt></ruby>にします。"
+    },
+     {
+      question:"60-13 <ruby>私<rt>わたし</rt></ruby>は<ruby>今夜<rt>こんや</rt></ruby>、<ruby>母<rt>はは</rt></ruby>を<ruby>手伝<rt>てつだ</rt></ruby>うつもりです。",
+      options:["<ruby>I<rt>アイ</rt></ruby> <ruby>will<rt>ウィル</rt></ruby> <ruby>help<rt>ヘルプ</rt></ruby> <ruby>my<rt>マイ</rt></ruby> <ruby>mother<rt>マザー</rt></ruby> <ruby>tonight<rt>トナイト</rt></ruby>.",
+      　　　　"<ruby>I<rt>アイ</rt></ruby> <ruby>helped<rt>ヘルプト</rt></ruby> <ruby>my<rt>マイ</rt></ruby> <ruby>mother<rt>マザー</rt></ruby> <ruby>tonight<rt>トナイト</rt></ruby>.",
+      　　　　"<ruby>I<rt>アイ</rt></ruby> <ruby>was<rt>アム</rt></ruby> <ruby>helping<rt>ヘルピング</rt></ruby> <ruby>my<rt>マイ</rt></ruby> <ruby>mother<rt>マザー</rt></ruby> <ruby>tonight<rt>トナイト</rt></ruby>.",
+      　　　　],
+      correctAnswer:0,
+      advice: "<ruby>未来形<rt>みらいけい</rt></ruby>は<ruby>will<rt>ウィル</rt></ruby>＋<ruby>動詞の原型<rt>どうし　げんけい</rt></ruby>か、<ruby>be going to<rt>ビィ ゴーイング トウ</rt></ruby>であらわします。"
+    },
+     {
+      question:"61-13 <ruby>私<rt>わたし</rt></ruby>たちは<ruby>来月<rt>らいげつ</rt></ruby>、おばのところに<ruby>滞在<rt>たいざい</rt></ruby>する<ruby>予定<rt>よてい</rt></ruby>です。",
+      options:["<ruby>We<rt>ウィ</rt></ruby> <ruby>are<rt>アー</rt></ruby> <ruby>will<rt>ウィル</rt></ruby> <ruby>stay<rt>スティ</rt></ruby> <ruby>with<rt>ウィズ</rt></ruby> <ruby>our<rt>アウア</rt></ruby> <ruby>aunt<rt>アァント</rt></ruby> <ruby>next<rt>ネキスト</rt></ruby> <ruby>month<rt>マンス</rt></ruby>.",
+      　　　　"<ruby>We<rt>ウィ</rt></ruby> <ruby>are<rt>アー</rt></ruby> <ruby>going<rt>ゴーイング</rt></ruby> <ruby>to<rt>トウ</rt></ruby> <ruby>stay<rt>スティ</rt></ruby> <ruby>with<rt>ウィズ</rt></ruby> <ruby>our<rt>アウア</rt></ruby> <ruby>aunt<rt>アァント</rt></ruby> <ruby>next<rt>ネキスト</rt></ruby> <ruby>month<rt>マンス</rt></ruby>.",
+      　　　　"<ruby>We<rt>ウィ</rt></ruby> <ruby>are<rt>アー</rt></ruby> <ruby>go<rt>ゴー</rt></ruby> <ruby>to<rt>トウ</rt></ruby> <ruby>stay<rt>スティ</rt></ruby> <ruby>with<rt>ウィズ</rt></ruby> <ruby>our<rt>アウア</rt></ruby> <ruby>aunt<rt>アァント</rt></ruby> <ruby>next<rt>ネキスト</rt></ruby> <ruby>month<rt>マンス</rt></ruby>.",
+      　　　　],
+      correctAnswer:1,
+      advice: "「～するつもりだ」は、<ruby>be going to<rt>ビィ ゴーイング トウ</rt></ruby>であらわせます。"
+    },
+     {
+      question:"62-13 <ruby>彼<rt>かれ</rt></ruby>はすぐここに<ruby>来<rt>く</rt></ruby>るでしょうか。",
+      options:["<ruby>Does<rt>ダズ</rt></ruby> <ruby>he<rt>ヒィ</rt></ruby> <ruby>come<rt>カム</rt></ruby> <ruby>here<rt>ヒヤ</rt></ruby> <ruby>soon<rt>スーン</rt></ruby> ?",
+      　　　　"<ruby>Do<rt>ドゥ</rt></ruby> <ruby>he<rt>ヒィ</rt></ruby> <ruby>come<rt>カム</rt></ruby> <ruby>here<rt>ヒヤ</rt></ruby> <ruby>soon<rt>スーン</rt></ruby> ?",
+      　　　　"<ruby>Will<rt>ウィル</rt></ruby> <ruby>he<rt>ヒィ</rt></ruby> <ruby>come<rt>カム</rt></ruby> <ruby>here<rt>ヒヤ</rt></ruby> <ruby>soon<rt>スーン</rt></ruby> ?",
+      　　　　],
+      correctAnswer:2,
+      advice: "<ruby>未来形<rt>みらいけい</rt></ruby>の<ruby>疑問文<rt>ぎもんぶん</rt></ruby>は、<ruby>will<rt>ウィル</rt></ruby>を<ruby>一番前<rt>いちばんまえ</rt></ruby>にもってきます。" 
+    },
+     {
+      question:"63-13 トムは<ruby>今年<rt>ことし</rt></ruby>の<ruby>夏<rt>なつ</rt></ruby>、<ruby>富士山<rt>ふじさん</rt></ruby>に<ruby>登<rt>のぼ</rt></ruby>る<ruby>予定<rt>よてい</rt></ruby>ですか。",
+      options:["<ruby>Is<rt>イズ</rt></ruby> <ruby>Tom<rt>トム</rt></ruby> <ruby>going<rt>ゴーイング</rt></ruby> <ruby>to<rt>トウ</rt></ruby> <ruby>climb<rt>クライム</rt></ruby> <ruby>Mt.<rt>マウント</rt></ruby> <ruby>Fuji<rt>フジ</rt></ruby> <ruby>this<rt>ズィス</rt></ruby> <ruby>summer<rt>サマー</rt></ruby>?",
+      　　　　"<ruby>Will<rt>ウィル</rt></ruby> <ruby>Tom<rt>トム</rt></ruby> <ruby>going<rt>ゴーイング</rt></ruby> <ruby>to<rt>トウ</rt></ruby> <ruby>climb<rt>クライム</rt></ruby> <ruby>Mt.<rt>マウント</rt></ruby> <ruby>Fuji<rt>フジ</rt></ruby> <ruby>this<rt>ズィス</rt></ruby> <ruby>summer<rt>サマー</rt></ruby>?",
+      　　　　"<ruby>Does<rt>ダズ</rt></ruby> <ruby>Tom<rt>トム</rt></ruby> <ruby>going<rt>ゴーイング</rt></ruby> <ruby>to<rt>トウ</rt></ruby> <ruby>climb<rt>クライム</rt></ruby> <ruby>Mt.<rt>マウント</rt></ruby> <ruby>Fuji<rt>フジ</rt></ruby> <ruby>this<rt>ズィス</rt></ruby> <ruby>summer<rt>サマー</rt></ruby>?",
+      　　　　],
+      correctAnswer:0,
+      advice: "<ruby>未来形<rt>みらいけい</rt></ruby><ruby>be going to<rt>ビィ ゴーイング トウ</rt></ruby>の<ruby>疑問文<rt>ぎもんぶん</rt></ruby>は、<ruby>be動詞<rt>ビィどうし</rt></ruby>を<ruby>一番前<rt>いちばんまえ</rt></ruby>にもってくる。"
+    },
+     {
+      question:"64-13 <ruby>今度<rt>こんど</rt></ruby>の<ruby>週末<rt>しゅうまつ</rt></ruby>は<ruby>晴<rt>は</rt></ruby>れないでしょう。",
+      options:["<ruby>It<rt>イト</rt></ruby> <ruby>doesn't<rt>ダズンツ</rt></ruby> <ruby>be<rt>ビィ</rt></ruby> <ruby>sunny<rt>サニィー</rt></ruby> <ruby>this<rt>ズィス</rt></ruby> <ruby>weekend<rt>ウィークエンド</rt></ruby>.",
+      　　　　 "<ruby>It<rt>イト</rt></ruby> <ruby>won't<rt>ウォンツ</rt></ruby> <ruby>be<rt>ビィ</rt></ruby> <ruby>sunny<rt>サニィー</rt></ruby> <ruby>this<rt>ズィス</rt></ruby> <ruby>weekend<rt>ウィークエンド</rt></ruby>.",
+      　　　　 "<ruby>It<rt>イト</rt></ruby> <ruby>don't<rt>ドゥンツ</rt></ruby> <ruby>be<rt>ビィ</rt></ruby> <ruby>sunny<rt>サニィー</rt></ruby> <ruby>this<rt>ズィス</rt></ruby> <ruby>weekend<rt>ウィークエンド</rt></ruby>.",
+      　　　　],
+      correctAnswer:1,
+      advice: "<ruby>未来形<rt>みらいけい</rt></ruby><ruby>will<rt>ウィル</rt></ruby>の<ruby>否定形<rt>ひていけい</rt></ruby>は、<ruby>will not<rt>ウィル ノット</rt></ruby>（<ruby>won't<rt>ウォンツ</rt></ruby>）です。"
+    },
+    {
+      question:"65-14 ジムは<ruby>日本語<rt>にほんご</rt></ruby>を<ruby>書<rt>か</rt></ruby>くことができます。",
+      options:["<ruby>Jim<rt>ジム</rt></ruby> <ruby>can<rt>キャン</rt></ruby> <ruby>writes<rt>ライツ</rt></ruby> <ruby>Japanese<rt>ジャパニーズ</rt></ruby> .",
+      　　　　 "<ruby>Jim<rt>ジム</rt></ruby> <ruby>can<rt>キャン</rt></ruby> <ruby>wrote<rt>ロート</rt></ruby> <ruby>Japanese<rt>ジャパニーズ</rt></ruby> .",
+      　　　　 "<ruby>Jim<rt>ジム</rt></ruby> <ruby>can<rt>キャン</rt></ruby> <ruby>write<rt>ライト</rt></ruby> <ruby>Japanese<rt>ジャパニーズ</rt></ruby> .",
+      　　　　],
+      correctAnswer:2,
+      advice: "できるは、<ruby>can<rt>キャン</rt></ruby>＋<ruby>動詞の原形<rt>どうし げんけい</rt></ruby>だよん。"
+    },
+     {
+      question:"66-14 <ruby>彼<rt>かれ</rt></ruby>らは<ruby>今夜<rt>こんや</rt></ruby>、ここに<ruby>来<rt>く</rt></ruby>るかもしれません。",
+      options:[ "<ruby>They<rt>ゼイ</rt></ruby> <ruby>may<rt>メイ</rt></ruby> <ruby>came<rt>ケイム</rt></ruby> <ruby>here<rt>ヒヤ</rt></ruby> <ruby>tonight<rt>トナイト</rt></ruby>.",
+      　　　　 "<ruby>They<rt>ゼイ</rt></ruby> <ruby>may<rt>メイ</rt></ruby> <ruby>come<rt>カム</rt></ruby> <ruby>here<rt>ヒヤ</rt></ruby> <ruby>tonight<rt>トナイト</rt></ruby>.",
+      　　　　 "<ruby>They<rt>ゼイ</rt></ruby> <ruby>may<rt>メイ</rt></ruby> <ruby>comes<rt>カムズ</rt></ruby> <ruby>here<rt>ヒヤ</rt></ruby> <ruby>tonight<rt>トナイト</rt></ruby>.",
+      　　　　],
+      correctAnswer:1,
+      advice: "～かもしれないは、<ruby>may<rt>メイ</rt></ruby>＋<ruby>動詞の原形<rt>どうし げんけい</rt></ruby>だよん。"
+    },
+    {
+      question:"67-14 <ruby>私<rt>わたし</rt></ruby>たちはたくさんの<ruby>本<rt>ほん</rt></ruby>を<ruby>読<rt>よ</rt></ruby>むべきです。",
+      options:[ "<ruby>We<rt>ウィ</rt></ruby> <ruby>should<rt>シュッド</rt></ruby> <ruby>read<rt>リード</rt></ruby> <ruby>many<rt>メニィ</rt></ruby> <ruby>books<rt>ブックス</rt></ruby>.",
+      　　　　 "<ruby>We<rt>ウィ</rt></ruby> <ruby>can<rt>キャン</rt></ruby> <ruby>read<rt>リード</rt></ruby> <ruby>many<rt>メニィ</rt></ruby> <ruby>books<rt>ブックス</rt></ruby>.",
+      　　　　  "<ruby>We<rt>ウィ</rt></ruby> <ruby>must<rt>マスト</rt></ruby> <ruby>read<rt>リード</rt></ruby> <ruby>many<rt>メニィ</rt></ruby> <ruby>books<rt>ブックス</rt></ruby>.",
+      　　　　],
+      correctAnswer:0,
+      advice: "～するべきは、<ruby>should<rt>シュッド</rt></ruby>＋<ruby>動詞の原形<rt>どうし げんけい</rt></ruby>だよん。"
+    },
+     {
+      question:"68-14 <ruby>私<rt>わたし</rt></ruby>は<ruby>今夜<rt>こんや</rt></ruby>、<ruby>早<rt>はや</rt></ruby>く<ruby>寝<rt>ね</rt></ruby>なければなりません。",
+      options:["<ruby>I<rt>アイ</rt></ruby> <ruby>shoud<rt>シュッド</rt></ruby> <ruby>to<rt>トウ</rt></ruby> <ruby>go<rt>ゴゥ</rt></ruby> <ruby>to<rt>トゥ</rt></ruby> <ruby>bed<rt>ベッド</rt></ruby> <ruby>early<rt>アーリィ</rt></ruby> <ruby>tonight<rt>トナイト</rt></ruby>.",
+      　　　　"<ruby>I<rt>アイ</rt></ruby> <ruby>must<rt>マスト</rt></ruby> <ruby>to<rt>トウ</rt></ruby> <ruby>go<rt>ゴゥ</rt></ruby> <ruby>to<rt>トゥ</rt></ruby> <ruby>bed<rt>ベッド</rt></ruby> <ruby>early<rt>アーリィ</rt></ruby> <ruby>tonight<rt>トナイト</rt></ruby>.",
+      　　　　"<ruby>I<rt>アイ</rt></ruby> <ruby>have<rt>ハフ</rt></ruby> <ruby>to<rt>トウ</rt></ruby> <ruby>go<rt>ゴゥ</rt></ruby> <ruby>to<rt>トゥ</rt></ruby> <ruby>bed<rt>ベッド</rt></ruby> <ruby>early<rt>アーリィ</rt></ruby> <ruby>tonight<rt>トナイト</rt></ruby>.",
+      　　　　],
+      correctAnswer:2,
+      advice: "～しなければならないは、<ruby>must<rt>マスト</rt></ruby>か<ruby>have to<rt>ハフ トウ</rt></ruby>です。あとに<ruby>to<rt>トウ</rt></ruby>がくるときは、<ruby>have<rt>ハフ</rt></ruby> <ruby>to<rt>トゥ</rt></ruby>となりますね。 "
+    },
+     {
+      question:"69-14 <ruby>彼女<rt>かのじょ</rt></ruby>は<ruby>今日<rt>きょう</rt></ruby>、<ruby>宿題<rt>しゅくだい</rt></ruby>をしなければなりません。",
+      options:["<ruby>She<rt>シィ</rt></ruby> <ruby>may<rt>メイ</rt></ruby> <ruby>do<rt>ドゥ</rt></ruby> <ruby>her<rt>ハー</rt></ruby> <ruby>homework<rt>ホームワーク</rt></ruby> <ruby>today<rt>チュデイ</rt></ruby>.",
+      　　　　 "<ruby>She<rt>シィ</rt></ruby> <ruby>must<rt>マスト</rt></ruby> <ruby>do<rt>ドゥ</rt></ruby> <ruby>her<rt>ハー</rt></ruby> <ruby>homework<rt>ホームワーク</rt></ruby> <ruby>today<rt>チュデイ</rt></ruby>.",
+      　　　　 "<ruby>She<rt>シィ</rt></ruby> <ruby>can<rt>キャン</rt></ruby> <ruby>do<rt>ドゥ</rt></ruby> <ruby>her<rt>ハー</rt></ruby> <ruby>homework<rt>ホームワーク</rt></ruby> <ruby>today<rt>チュデイ</rt></ruby>.",
+      　　　　],
+      correctAnswer:1,
+      advice: "～しなければならないは、<ruby>must<rt>マスト</rt></ruby>か<ruby>have to<rt>ハフ トウ</rt></ruby>です。"
+    },
+     {
+      question:"70-14 このコンピュータを<ruby>使<rt>つか</rt></ruby>ってもよいです。",
+      options:["<ruby>You<rt>ユー</rt></ruby> <ruby>may<rt>メイ</rt></ruby> <ruby>use<rt>ユーズ</rt></ruby> <ruby>this<rt>ズィス</rt></ruby> <ruby>computer<rt>コンピュータ</rt></ruby>.",
+      　　　　 "<ruby>You<rt>ユー</rt></ruby> <ruby>should<rt>シュッド</rt></ruby> <ruby>use<rt>ユーズ</rt></ruby> <ruby>this<rt>ズィス</rt></ruby> <ruby>computer<rt>コンピュータ</rt></ruby>.",
+      　　　　 "<ruby>You<rt>ユー</rt></ruby> <ruby>must<rt>マスト</rt></ruby> <ruby>use<rt>ユーズ</rt></ruby> <ruby>this<rt>ズィス</rt></ruby> <ruby>computer<rt>コンピュータ</rt></ruby>.",
+      　　　　],
+      correctAnswer:0,
+      advice: "～してよいは、<ruby>may<rt>メイ</rt></ruby>＋<ruby>動詞の原形<rt>どうし げんけい</rt></ruby>です。"
+    },
+     {
+      question:"71-14 ユキは<ruby>明日<rt>あす</rt></ruby>、<ruby>病院<rt>びょういん</rt></ruby>へ、<ruby>行<rt>い</rt></ruby>かなければなりません。",
+      options:["<ruby>Yuki<rt>ユキ</rt></ruby> <ruby>have<rt>ハズ</rt></ruby> <ruby>to<rt>トゥ</rt></ruby> <ruby>go<rt>ゴゥ</rt></ruby> <ruby>to<rt>トゥ</rt></ruby> <ruby>the<rt>ザ</rt></ruby> <ruby>hospital<rt>ホスピタル</rt></ruby> <ruby>tomorrow<rt>トモロー</rt></ruby>.",
+      　　　　"<ruby>Yuki<rt>ユキ</rt></ruby> <ruby>may<rt>メイ</rt></ruby> <ruby>to<rt>トゥ</rt></ruby> <ruby>go<rt>ゴゥ</rt></ruby> <ruby>to<rt>トゥ</rt></ruby> <ruby>the<rt>ザ</rt></ruby> <ruby>hospital<rt>ホスピタル</rt></ruby> <ruby>tomorrow<rt>トモロー</rt></ruby>.",
+      　　　　"<ruby>Yuki<rt>ユキ</rt></ruby> <ruby>has<rt>ハズ</rt></ruby> <ruby>to<rt>トゥ</rt></ruby> <ruby>go<rt>ゴゥ</rt></ruby> <ruby>to<rt>トゥ</rt></ruby> <ruby>the<rt>ザ</rt></ruby> <ruby>hospital<rt>ホスピタル</rt></ruby> <ruby>tomorrow<rt>トモロー</rt></ruby>.",
+      　　　　],
+      correctAnswer:2,
+      advice: "～しなければならないは、<ruby>must<rt>マスト</rt></ruby>か<ruby>have to<rt>ハフ トウ</rt></ruby>ですが、<ruby>主語<rt>しゅご</rt></ruby>が<ruby>she<rt>シー</rt></ruby>のときは、<ruby>has to<rt>ハズ トウ</rt></ruby>になります。"
+    },
+     {
+      question:"72-15 <ruby>彼女<rt>かのじょ</rt></ruby>は<ruby>自転車<rt>じてんしゃ</rt></ruby>に<ruby>乗<rt>の</rt></ruby>ることができません。",
+      options:["<ruby>She<rt>シー</rt></ruby> <ruby>can't<rt>キャンツ</rt></ruby> <ruby>ride<rt>ライド</rt></ruby> <ruby>a<rt>ア</rt></ruby> <ruby>bike<rt>バイク</rt></ruby>.",
+      　　　　"<ruby>She<rt>シー</rt></ruby> <ruby>don't<rt>ドンツ</rt></ruby> <ruby>ride<rt>ライド</rt></ruby> <ruby>a<rt>ア</rt></ruby> <ruby>bike<rt>バイク</rt></ruby>.",
+      　　　　"<ruby>She<rt>シー</rt></ruby> <ruby>doesn'tt<rt>ダズンツ</rt></ruby> <ruby>ride<rt>ライド</rt></ruby> <ruby>a<rt>ア</rt></ruby> <ruby>bike<rt>バイク</rt></ruby>.",
+      　　　　],
+      correctAnswer:0,
+      advice: "できないは、<ruby>can not<rt>キャン ノット</rt></ruby>（<ruby>can't<rt>キャンツ</rt></ruby>）です。"
+    },
+     {
+      question:"73-15 あなたは<ruby>急<rt>いそ</rt></ruby>ぐ<ruby>必要<rt>ひつよう</rt></ruby>はありません。",
+      options:["<ruby>You<rt>ユー</rt></ruby> <ruby>mustn't<rt>マストンツ</rt></ruby> <ruby>have<rt>ハフ</rt></ruby> <ruby>to<rt>トゥ</rt></ruby> <ruby>hurry<rt>ハリー</rt></ruby>.",
+      　　　　"<ruby>You<rt>ユー</rt></ruby> <ruby>don't<rt>ドンツ</rt></ruby> <ruby>have<rt>ハフ</rt></ruby> <ruby>to<rt>トゥ</rt></ruby> <ruby>hurry<rt>ハリー</rt></ruby>.",
+      　　　　"<ruby>You<rt>ユー</rt></ruby> <ruby>can't<rt>キャンツ</rt></ruby> <ruby>have<rt>ハフ</rt></ruby> <ruby>to<rt>トゥ</rt></ruby> <ruby>hurry<rt>ハリー</rt></ruby>.",
+      　　　　],
+      correctAnswer:1,
+      advice: "～する<ruby>必要<rt>ひつよう</rt></ruby>がないは、<ruby>don't(doesn't)<rt>ドンツ ダズンツ</rt></ruby> <ruby>have to<rt>ハフ トウ</rt></ruby>です。"
+    },
+     {
+      question:"74-15 あなたは<ruby>今日<rt>きょう</rt></ruby>、<ruby>学校<rt>がっこう</rt></ruby>に<ruby>行<rt>い</rt></ruby>くべきではありません。",
+      options:["<ruby>You<rt>ユー</rt></ruby> <ruby>don't<rt>ドンツ</rt></ruby> <ruby>go<rt>ゴゥ</rt></ruby> <ruby>to<rt>トウ</rt></ruby> <ruby>school<rt>スクール</rt></ruby> <ruby>today<rt>チュデイ</rt></ruby>.",
+      　　　　"<ruby>You<rt>ユー</rt></ruby> <ruby>mustn't<rt>マストンツ</rt></ruby> <ruby>go<rt>ゴゥ</rt></ruby> <ruby>to<rt>トウ</rt></ruby> <ruby>school<rt>スクール</rt></ruby> <ruby>today<rt>チュデイ</rt></ruby>.",
+      　　　　"<ruby>You<rt>ユー</rt></ruby> <ruby>shouldn't<rt>シュドンツ</rt></ruby> <ruby>go<rt>ゴゥ</rt></ruby> <ruby>to<rt>トウ</rt></ruby> <ruby>school<rt>スクール</rt></ruby> <ruby>today<rt>チュデイ</rt></ruby>.",
+      　　　　],
+      correctAnswer:2,
+      advice: "～すべきでないは、<ruby>should not<rt>シュッド ノット</rt></ruby>（<ruby>shoudn't<rt>シュドゥンツ</rt></ruby>）です。"
+    },
+     {
+      question:"75-15 <ruby>私<rt>わたし</rt></ruby>はここにいなければなりませんか。",
+      options:["<ruby>must<rt>マスト</rt></ruby> <ruby>I<rt>アイ</rt></ruby> <ruby>stay<rt>スティ</rt></ruby> <ruby>here<rt>ヒヤ</rt></ruby> ?",
+      　　　　 "<ruby>Do<rt>ドゥ</rt></ruby> <ruby>I<rt>アイ</rt></ruby> <ruby>stay<rt>スティ</rt></ruby> <ruby>here<rt>ヒヤ</rt></ruby> ?",
+      　　　　"<ruby>Can<rt>キャン</rt></ruby> <ruby>I<rt>アイ</rt></ruby> <ruby>stay<rt>スティ</rt></ruby> <ruby>here<rt>ヒヤ</rt></ruby> ?",
+      　　　　],
+      correctAnswer:0,
+      advice: "～しなければならないかは、<ruby>must<rt>マスト</rt></ruby>を<ruby>一番前<rt>いちばんまえ</rt></ruby>）にもってきます。"
+    },
+    {
+      question:"76-15 <ruby>私<rt>わたし</rt></ruby>はこのいすに<ruby>座<rt>すわ</rt></ruby>ってもよいですか。",
+      options:["<ruby>must<rt>マスト</rt></ruby> <ruby>I<rt>アイ</rt></ruby> <ruby>sit<rt>シット</rt></ruby> <ruby>down<rt>ダウン</rt></ruby> <ruby>on<rt>オン</rt></ruby> <ruby>this<rt>ズィス</rt></ruby> <ruby>chair<rt>チェア</rt></ruby>?",
+      　　　　"<ruby>Can<rt>キャン</rt></ruby> <ruby>I<rt>アイ</rt></ruby> <ruby>sit<rt>シット</rt></ruby> <ruby>down<rt>ダウン</rt></ruby> <ruby>on<rt>オン</rt></ruby> <ruby>this<rt>ズィス</rt></ruby> <ruby>chair<rt>チェア</rt></ruby>?",
+      　　　　"<ruby>Do<rt>ドゥ</rt></ruby> <ruby>I<rt>アイ</rt></ruby> <ruby>sit<rt>シット</rt></ruby> <ruby>down<rt>ダウン</rt></ruby> <ruby>on<rt>オン</rt></ruby> <ruby>this<rt>ズィス</rt></ruby> <ruby>chair<rt>チェア</rt></ruby>?",
+      　　　　],
+      correctAnswer:1,
+      advice: "～してもよいかは、<ruby>may<rt>メイ</rt></ruby>か、<ruby>can<rt>キャン</rt></ruby>を<ruby>一番前<rt>いちばんまえ</rt></ruby>）にもってきます。"
+    },
+    {
+      question:"77-16 <ruby>英語<rt>えいご</rt></ruby>を<ruby>勉強<rt>べんきょう</rt></ruby>するのは<ruby>簡単<rt>かんたん</rt></ruby>ではありません。",
+      options:["<ruby>Study<rt>スタディ</rt></ruby> <ruby>English<rt>イングリッシュ</rt></ruby> <ruby>is<rt>イズ</rt></ruby> <ruby>not<rt>ノット</rt></ruby> <ruby>easy<rt>イージィ</rt></ruby>.",
+      　　　　"<ruby>Studied<rt>スタディド</rt></ruby> <ruby>English<rt>イングリッシュ</rt></ruby> <ruby>is<rt>イズ</rt></ruby> <ruby>not<rt>ノット</rt></ruby> <ruby>easy<rt>イージィ</rt></ruby>.",
+      　　　　"<ruby>Studying<rt>スタディング</rt></ruby> <ruby>English<rt>イングリッシュ</rt></ruby> <ruby>is<rt>イズ</rt></ruby> <ruby>not<rt>ノット</rt></ruby> <ruby>easy<rt>イージィ</rt></ruby>.",
+      　　　　],
+      correctAnswer:2,
+      advice: "「～すること」を<ruby>動詞<rt>どうし</rt></ruby>の～<ruby>ing形<rt>イングけい</rt></ruby>（<ruby>動名詞<rt>どうめいし</rt></ruby>）であらわせます"
+    },
+    {
+      question:"78-16 <ruby>私<rt>わたし</rt></ruby>は<ruby>夕食前<rt>ゆうしょくまえ</rt></ruby>に<ruby>宿題<rt>しゅくだい</rt></ruby>を<ruby>終<rt>お</rt></ruby>えました。",
+      options:["<ruby>I<rt>アイ</rt></ruby> <ruby>finished<rt>フィニッシュト</rt></ruby> <ruby>doing<rt>ドゥイング</rt></ruby> <ruby>my<rt>マイ</rt></ruby> <ruby>homework<rt>ホームワーク</rt></ruby> <ruby>before<rt>ビフォア</rt></ruby> <ruby>dinner<rt>ディナー</rt></ruby>.",
+      　　　　"<ruby>I<rt>アイ</rt></ruby> <ruby>finished<rt>フィニッシュト</rt></ruby> <ruby>did<rt>ディド</rt></ruby> <ruby>my<rt>マイ</rt></ruby> <ruby>homework<rt>ホームワーク</rt></ruby> <ruby>before<rt>ビフォア</rt></ruby> <ruby>dinner<rt>ディナー</rt></ruby>.",
+      　　　　"<ruby>I<rt>アイ</rt></ruby> <ruby>finished<rt>フィニッシュト</rt></ruby> <ruby>do<rt>ドゥ</rt></ruby> <ruby>my<rt>マイ</rt></ruby> <ruby>homework<rt>ホームワーク</rt></ruby> <ruby>before<rt>ビフォア</rt></ruby> <ruby>dinner<rt>ディナー</rt></ruby>.",
+      　　　　],
+      correctAnswer:0,
+      advice: "<ruby>宿題<rt>しゅくだい</rt></ruby>をすることは、<ruby>doing homework<rt>ドゥーイング ホームワーク</rt></ruby>である。<ruby>finished<rt>フィニッシュト</rt></ruby>は、<ruby>目的語<rt>もくてきご</rt></ruby>を<ruby>名詞か動名詞<rt>めいし どうめいし</rt></ruby>（<ruby>～ing<rt> イング</rt></ruby>）がくる。"
+    },
+     {
+      question:"79-16 <ruby>彼<rt>かれ</rt></ruby>らは<ruby>教室<rt>きょうしつ</rt></ruby>を<ruby>掃除<rt>そうじ</rt></ruby>し<ruby>始<rt>はじ</rt></ruby>めました。",
+      options:["<ruby>They<rt>ゼイ</rt></ruby> <ruby>started<rt>スターテッド</rt></ruby> <ruby>clean<rt>クリーン</rt></ruby> <ruby>the<rt>ザ</rt></ruby> <ruby>classroom<rt>クラスルーム</rt></ruby>.",
+      　　　　"<ruby>They<rt>ゼイ</rt></ruby> <ruby>started<rt>スターテッド</rt></ruby> <ruby>cleaned<rt>クリーンド</rt></ruby> <ruby>the<rt>ザ</rt></ruby> <ruby>classroom<rt>クラスルーム</rt></ruby>.",
+      　　　　"<ruby>They<rt>ゼイ</rt></ruby> <ruby>started<rt>スターテッド</rt></ruby> <ruby>cleaning<rt>クリーニング</rt></ruby> <ruby>the<rt>ザ</rt></ruby> <ruby>classroom<rt>クラスルーム</rt></ruby>.",
+      　　　　],
+      correctAnswer:2,
+      advice: "<ruby>started<rt>スターテッド</rt></ruby>の<ruby>目的語<rt>もくてきご</rt></ruby>は<ruby>名詞か動名詞<rt>めいし どうめいし</rt></ruby>（<ruby>～ing<rt> イング</rt></ruby>）がくる。"
+    },
+    {
+      question:"80-16 トムはギターを<ruby>弾<rt>ひ</rt></ruby>くのが<ruby>得意<rt>とくい</rt></ruby>です。",
+      options:["<ruby>Tom<rt>トム</rt></ruby> <ruby>is<rt>イズ</rt></ruby> <ruby>good<rt>グッド</rt></ruby> <ruby>at<rt>アト</rt></ruby> <ruby>plays<rt>プレィズ</rt></ruby> <ruby>the<rt>ザ</rt></ruby> <ruby>guitar<rt>ギター</rt></ruby>.",
+      　　　　"<ruby>Tom<rt>トム</rt></ruby> <ruby>is<rt>イズ</rt></ruby> <ruby>good<rt>グッド</rt></ruby> <ruby>at<rt>アト</rt></ruby> <ruby>playing<rt>プレィイング</rt></ruby> <ruby>the<rt>ザ</rt></ruby> <ruby>guitar<rt>ギター</rt></ruby>.",
+      　　　　"<ruby>Tom<rt>トム</rt></ruby> <ruby>is<rt>イズ</rt></ruby> <ruby>good<rt>グッド</rt></ruby> <ruby>at<rt>アト</rt></ruby> <ruby>played<rt>プレィド</rt></ruby> <ruby>the<rt>ザ</rt></ruby> <ruby>guitar<rt>ギター</rt></ruby>.",
+      　　　　],
+      correctAnswer:1,
+      advice: "<ruby>be good at<rt>ビィ グッド アット</rt></ruby>の<ruby>意味<rt>いみ</rt></ruby>は、～が<ruby>得意<rt>とくい</rt></ruby>です。 <ruby>前置詞 at<rt>ぜんちし アット</rt></ruby>のあとは<ruby>名詞か動名詞<rt>めいし どうめいし</rt></ruby>（<ruby>～ing<rt> イング</rt></ruby>）がくる。"
+    },
+     {
+      question:"81-16 <ruby>私<rt>わたし</rt></ruby>を<ruby>手伝<rt>てつだ</rt></ruby>ってくれてありがとうございます。",
+      options:["<ruby>Thank<rt>サンク</rt></ruby> <ruby>you<rt>ユー</rt></ruby> <ruby>for<rt>フォア</rt></ruby> <ruby>helping<rt>ヘルピング</rt></ruby> <ruby>me<rt>ミィ</rt></ruby>.",
+      　　　　"<ruby>Thank<rt>サンク</rt></ruby> <ruby>you<rt>ユー</rt></ruby> <ruby>for<rt>フォア</rt></ruby> <ruby>help<rt>ヘルプ</rt></ruby> <ruby>me<rt>ミィ</rt></ruby>.",
+      　　　　"<ruby>Thank<rt>サンク</rt></ruby> <ruby>you<rt>ユー</rt></ruby> <ruby>for<rt>フォア</rt></ruby> <ruby>helped<rt>ヘルプト</rt></ruby> <ruby>me<rt>ミィ</rt></ruby>.",
+      　　　　],
+      correctAnswer:0,
+      advice: "<ruby>前置詞 for<rt>ぜんちし フォア</rt></ruby>（～して）のあとも<ruby>名詞か動名詞<rt>めいし どうめいし</rt></ruby>（<ruby>～ing<rt> イング</rt></ruby>）がくる。"
+  
+  　 },
+        ];
+
+        let currentQuizIndex = 0;
+
+        function loadQuiz() {
+            const quiz = quizzes[currentQuizIndex];
+            document.getElementById('question').innerHTML = quiz.question;
+            document.getElementById('option1').innerHTML = quiz.options[0];
+            document.getElementById('option2').innerHTML = quiz.options[1];
+            document.getElementById('option3').innerHTML = quiz.options[2];
+            document.getElementById('result').textContent = '';
+            document.getElementById('advice').innerHTML = '';
+            document.getElementById('next-button').style.display = 'none';
+        }
+
+        function checkAnswer(selectedOption) {
+            const quiz = quizzes[currentQuizIndex];
+            const resultElement = document.getElementById('result');
+            const adviceElement = document.getElementById('advice');
+            const nextButton = document.getElementById('next-button');
+            if (selectedOption === quiz.correctAnswer) {
+                resultElement.textContent = "正解！";
+                resultElement.style.color = "green";
+                nextButton.style.display = 'block';
+            } else {
+                resultElement.textContent = "不正解。";
+                resultElement.style.color = "red";
+                adviceElement.innerHTML = quiz.advice;
+                nextButton.style.display = 'block';
+            }
+        }
+
+        function nextQuiz() {
+            currentQuizIndex++;
+            if (currentQuizIndex < quizzes.length) {
+                loadQuiz();
+            } else {
+                document.getElementById('quiz-container').innerHTML = "<h2>すべてのクイズが終了しました！</h2>";
+            }
+        }
+
+        loadQuiz();
+    </script>
+</body>
+</html>
